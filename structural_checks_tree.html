@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Structural Checks Tree</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fff; color: #1a1a1a; padding: 1.5rem; }
+.wrap { max-width: 720px; }
+.topbar { display: flex; gap: 10px; margin-bottom: 1rem; flex-wrap: wrap; }
+.stat { background: #f5f5f3; border-radius: 8px; padding: 7px 14px; font-size: 13px; color: #666; }
+.stat b { color: #1a1a1a; font-weight: 500; }
+.big-bar { height: 8px; border-radius: 4px; background: #e8e8e4; overflow: hidden; margin-bottom: 1.25rem; }
+.big-fill { height: 100%; border-radius: 4px; background: #1D9E75; }
+.legend { display: flex; gap: 16px; font-size: 12px; color: #888; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.li { display: flex; align-items: center; gap: 5px; }
+.lc { width: 10px; height: 10px; border-radius: 3px; }
+.lc-done { background: #1D9E75; }
+.lc-wip  { background: #378ADD; }
+.lc-todo { background: #ccc; }
+ul.tree { list-style: none; padding: 0; }
+ul.tree ul { list-style: none; padding: 0; margin-left: 20px; border-left: 1.5px solid #e0e0da; }
+li.tnode { padding: 0; }
+.row { display: flex; align-items: center; gap: 7px; padding: 4px 6px; border-radius: 6px; cursor: default; user-select: none; }
+.row:hover { background: #f5f5f3; }
+.toggle { width: 16px; height: 16px; border-radius: 4px; border: 0.5px solid #ccc; background: #fff; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; color: #888; }
+.spacer { width: 16px; flex-shrink: 0; }
+.label { font-size: 13px; flex: 1; }
+.label.group { font-weight: 500; }
+.badge { font-size: 11px; padding: 1px 7px; border-radius: 10px; white-space: nowrap; flex-shrink: 0; }
+.badge-done { background: #EAF3DE; color: #3B6D11; }
+.badge-wip  { background: #E6F1FB; color: #185FA5; }
+.badge-todo { background: #f0f0ec; color: #888; }
+.count { font-size: 12px; color: #888; white-space: nowrap; flex-shrink: 0; }
+.count b { color: #1a1a1a; font-weight: 500; }
+.mini { width: 36px; height: 5px; border-radius: 3px; background: #e8e8e4; overflow: hidden; flex-shrink: 0; }
+.mini-f { height: 100%; border-radius: 3px; }
+.f-done { background: #1D9E75; }
+.f-wip  { background: #378ADD; }
+.stripe { width: 8px; flex-shrink: 0; border-radius: 2px; align-self: stretch; min-height: 22px; }
+.s-done { background: #1D9E75; }
+.s-wip  { background: #378ADD; }
+.s-todo { background: #ccc; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="stat">Готово: <b id="s1">0</b></div>
+    <div class="stat">В работе: <b id="s2">0</b></div>
+    <div class="stat">Осталось: <b id="s3">0</b></div>
+    <div class="stat">Прогресс: <b id="s4">0%</b></div>
+  </div>
+  <div class="big-bar"><div class="big-fill" id="bigbar" style="width:0"></div></div>
+  <div class="legend">
+    <div class="li"><div class="lc lc-done"></div>Готово</div>
+    <div class="li"><div class="lc lc-wip"></div>В работе</div>
+    <div class="li"><div class="lc lc-todo"></div>Не начато</div>
+  </div>
+  <ul class="tree" id="root"></ul>
+</div>
+<script>
+const data = [
+  { id:'beam', label:'Балка', children:[
+    { id:'beam-sq', label:'Квадратная балка', children:[
+      { id:'beam-sq-1', label:'Проверка изгиба', status:'done' },
+      { id:'beam-sq-2', label:'Проверка среза', status:'done' },
+      { id:'beam-sq-3', label:'Проверка деформации', status:'done' },
+    ]},
+    { id:'beam-rd', label:'Круглая балка', children:[
+      { id:'beam-rd-1', label:'Проверка изгиба', status:'done' },
+      { id:'beam-rd-2', label:'Проверка среза', status:'wip' },
+      { id:'beam-rd-3', label:'Проверка деформации', status:'todo' },
+    ]},
+  ]},
+  { id:'col', label:'Колонна', children:[
+    { id:'col-long', label:'Длинная колонна', children:[
+      { id:'col-long-1', label:'Расчёт 1: Продольный изгиб', status:'done' },
+      { id:'col-long-2', label:'Расчёт 2: Устойчивость', status:'todo' },
+    ]},
+    { id:'col-short', label:'Короткая колонна', children:[
+      { id:'col-short-1', label:'Расчёт 1: Центральное сжатие', status:'todo' },
+      { id:'col-short-2', label:'Расчёт 2: Внецентренное сжатие', status:'todo' },
+      { id:'col-short-3', label:'Расчёт 3: Поперечная сила', status:'todo' },
+    ]},
+  ]},
+];
+
+const collapsed = new Set(['col','beam-sq']);
+
+function leaves(n){ return n.children ? n.children.flatMap(leaves) : [n]; }
+function groupStatus(n){
+  const ls = leaves(n);
+  const d = ls.filter(x=>x.status==='done').length;
+  const w = ls.filter(x=>x.status==='wip').length;
+  if(d===ls.length) return 'done';
+  if(d>0||w>0) return 'wip';
+  return 'todo';
+}
+
+function buildNode(n, depth){
+  const isGroup = !!n.children;
+  const st = isGroup ? groupStatus(n) : n.status;
+  const ls = leaves(n);
+  const done = ls.filter(x=>x.status==='done').length;
+  const total = ls.length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  const isCol = collapsed.has(n.id);
+  const stripeClass = `s-${st}`;
+  const badgeText = st==='done'?'Готово': st==='wip'?'В работе':'Не начато';
+  const badgeClass = `badge badge-${st}`;
+  const fillClass = st==='done'?'f-done':'f-wip';
+
+  let inner = `<div class="row">
+    <div class="stripe ${stripeClass}"></div>
+    ${isGroup
+      ? `<div class="toggle" onclick="tog('${n.id}')">${isCol?'▸':'▾'}</div>`
+      : `<div class="spacer"></div>`}
+    <span class="label${isGroup?' group':''}">${n.label}</span>`;
+
+  if(isGroup){
+    inner += `<div class="mini"><div class="mini-f ${fillClass}" style="width:${pct}%"></div></div>
+      <span class="count"><b>${done}</b>/${total}</span>`;
+  } else {
+    inner += `<span class="${badgeClass}">${badgeText}</span>`;
+  }
+  inner += `</div>`;
+
+  let children = '';
+  if(isGroup && !isCol){
+    children = `<ul>${n.children.map(c=>buildNode(c,depth+1)).join('')}</ul>`;
+  }
+  return `<li class="tnode">${inner}${children}</li>`;
+}
+
+function updateStats(){
+  const all = data.flatMap(leaves);
+  const d = all.filter(x=>x.status==='done').length;
+  const w = all.filter(x=>x.status==='wip').length;
+  const t = all.filter(x=>x.status==='todo').length;
+  const pct = Math.round(d/all.length*100);
+  document.getElementById('s1').textContent = d;
+  document.getElementById('s2').textContent = w;
+  document.getElementById('s3').textContent = t;
+  document.getElementById('s4').textContent = pct+'%';
+  document.getElementById('bigbar').style.width = pct+'%';
+}
+
+function render(){
+  document.getElementById('root').innerHTML = data.map(n=>buildNode(n,0)).join('');
+  updateStats();
+}
+
+window.tog = function(id){
+  collapsed.has(id) ? collapsed.delete(id) : collapsed.add(id);
+  render();
+};
+
+render();
+</script>
+</body>
+</html>
