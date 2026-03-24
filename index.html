@@ -8,6 +8,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fff; color: #1a1a1a; padding: 1.5rem; }
 .wrap { max-width: 920px; }
+
 .topbar { display: flex; gap: 12px; margin-bottom: 1rem; flex-wrap: wrap; }
 .vblock { background: #f5f5f3; border-radius: 8px; padding: 10px 16px; font-size: 13px; flex: 1; min-width: 200px; }
 .vblock-title { font-weight: 500; font-size: 12px; color: #888; margin-bottom: 6px; }
@@ -17,15 +18,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .vblock-num { font-size: 12px; color: #888; white-space: nowrap; }
 .vblock-num b { color: #1a1a1a; font-weight: 500; }
 .vblock-sub { font-size: 11px; color: #aaa; margin-top: 2px; }
-.legend { display: flex; gap: 8px; font-size: 12px; color: #888; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; }
+
+.legend { display: flex; gap: 6px; font-size: 12px; color: #888; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; }
+.legend-arrow { color: #ccc; font-size: 11px; }
 .badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; white-space: nowrap; flex-shrink: 0; }
-.b-done       { background: #EAF3DE; color: #3B6D11; }
-.b-todo       { background: #FCEBEB; color: #A32D2D; }
-.b-onhold     { background: #f0f0ec; color: #888; }
-.b-wip        { background: #FFF3DC; color: #8a5c00; }
-.ver { font-size: 10px; padding: 1px 5px; border-radius: 3px; font-weight: 500; flex-shrink: 0; }
-.ver-v1 { background: #EAF3DE; color: #3B6D11; }
-.ver-v2 { background: #E6F1FB; color: #185FA5; }
+.b-done   { background: #EAF3DE; color: #3B6D11; }
+.b-todo   { background: #FCEBEB; color: #A32D2D; }
+.b-onhold { background: #f0f0ec; color: #888; }
+.b-wip    { background: #FFF3DC; color: #8a5c00; }
+
 ul.tree { list-style: none; padding: 0; }
 ul.tree ul { list-style: none; padding: 0; margin-left: 20px; border-left: 1.5px solid #e0e0da; }
 li.tnode { padding: 0; }
@@ -52,44 +53,47 @@ li.tnode { padding: 0; }
 <div class="wrap">
   <div class="topbar">
     <div class="vblock">
-      <div class="vblock-title">Version 1</div>
+      <div class="vblock-title">Overall progress</div>
       <div class="vblock-row">
-        <div class="vblock-bar"><div class="vblock-fill" id="bar-v1" style="width:0"></div></div>
-        <span class="vblock-num"><b id="done-v1">0</b>/<span id="total-v1">0</span> done</span>
+        <div class="vblock-bar"><div class="vblock-fill" id="bar-all" style="width:0"></div></div>
+        <span class="vblock-num"><b id="done-all">0</b>/<span id="total-all">0</span> done</span>
       </div>
-      <div class="vblock-sub" id="breakdown-v1"></div>
-    </div>
-    <div class="vblock">
-      <div class="vblock-title">Version 2</div>
-      <div class="vblock-row">
-        <div class="vblock-bar"><div class="vblock-fill" id="bar-v2" style="width:0"></div></div>
-        <span class="vblock-num"><b id="done-v2">0</b>/<span id="total-v2">0</span> done</span>
-      </div>
-      <div class="vblock-sub" id="breakdown-v2"></div>
+      <div class="vblock-sub" id="breakdown-all"></div>
     </div>
   </div>
+
   <div class="legend">
+    <span class="badge b-todo">To do</span>
+    <span class="legend-arrow">→</span>
+    <span class="badge b-wip">Methodology <span style="opacity:.6;font-size:10px">[TECH]</span></span>
+    <span class="legend-arrow">→</span>
+    <span class="badge b-wip">Analysis <span style="opacity:.6;font-size:10px">[RTA]</span></span>
+    <span class="legend-arrow">→</span>
+    <span class="badge b-wip">Dev <span style="opacity:.6;font-size:10px">[RTA]</span></span>
+    <span class="legend-arrow">→</span>
+    <span class="badge b-wip">QA <span style="opacity:.6;font-size:10px">[TECH]</span></span>
+    <span class="legend-arrow">→</span>
+    <span class="badge b-wip">Export to report <span style="opacity:.6;font-size:10px">[RTA]</span></span>
+    <span class="legend-arrow">→</span>
+    <span class="badge b-wip">Review <span style="opacity:.6;font-size:10px">[TECH]</span></span>
+    <span class="legend-arrow">→</span>
     <span class="badge b-done">Done</span>
-    <span class="badge b-wip">Methodology</span>
-    <span class="badge b-wip">Code</span>
-    <span class="badge b-wip">Validation</span>
-    <span class="badge b-wip">Export</span>
-    <span class="badge b-todo">To Do</span>
-    <span class="badge b-onhold">On Hold</span>
-    <span style="margin-left:8px" class="ver ver-v1">v1</span>
-    <span class="ver ver-v2">v2</span>
+    <span class="badge b-onhold" style="margin-left:8px">On Hold</span>
   </div>
+
   <ul class="tree" id="root"></ul>
 </div>
 <script>
 const STATUSES = [
-  { key:'todo',        label:'To Do',       cls:'todo' },
-  { key:'onhold',      label:'On Hold',     cls:'onhold' },
-  { key:'methodology', label:'Methodology', cls:'wip' },
-  { key:'code',        label:'Code',        cls:'wip' },
-  { key:'validation',  label:'Validation',  cls:'wip' },
-  { key:'export',      label:'Export',      cls:'wip' },
-  { key:'done',        label:'Done',        cls:'done' },
+  { key:'todo',       label:'To Do',          cls:'todo' },
+  { key:'onhold',     label:'On Hold',         cls:'onhold' },
+  { key:'methodology',label:'Methodology',     cls:'wip' },
+  { key:'analysis',   label:'Analysis',        cls:'wip' },
+  { key:'dev',        label:'Dev',             cls:'wip' },
+  { key:'qa',         label:'QA',              cls:'wip' },
+  { key:'export',     label:'Export to report',cls:'wip' },
+  { key:'review',     label:'Review',          cls:'wip' },
+  { key:'done',       label:'Done',            cls:'done' },
 ];
 
 function sCls(key){ return (STATUSES.find(x=>x.key===key)||{cls:'todo'}).cls; }
@@ -99,56 +103,56 @@ const data = [
   { id:'beams', label:'Beams', children:[
     { id:'glulam-beam', label:'Glulam beam', children:[
       { id:'gb-uls', label:'ULS', children:[
-        { id:'gb-uls-bend', label:'Bending', ver:'v1', status:'done', link:'#gb-uls-bend' },
+        { id:'gb-uls-bend', label:'Bending', /*ver:'v1',*/ status:'done', link:'#gb-uls-bend' },
       ]},
       { id:'gb-ulsfire', label:'ULS Fire', children:[
-        { id:'gb-ulsfire-bend', label:'Bending', ver:'v1', status:'done', link:'#gb-ulsfire-bend' },
+        { id:'gb-ulsfire-bend', label:'Bending', /*ver:'v1',*/ status:'done', link:'#gb-ulsfire-bend' },
       ]},
       { id:'gb-sls', label:'SLS', children:[
-        { id:'gb-sls-defl', label:'Deflection', ver:'v1', status:'done', link:'#gb-sls-defl' },
+        { id:'gb-sls-defl', label:'Deflection', /*ver:'v1',*/ status:'done', link:'#gb-sls-defl' },
       ]},
-      { id:'gb-vib', label:'Vibration', children:[
+      /*{ id:'gb-vib', label:'Vibration', children:[
         { id:'gb-vib-1', label:'Vibration check', ver:'v2', status:'onhold', link:'#gb-vib-1' },
-      ]},
+      ]},*/
     ]},
     { id:'pfeifer-beam', label:'Composite beam Pfeifer', children:[
       { id:'pb-uls', label:'ULS', children:[
-        { id:'pb-uls-bend', label:'Bending', ver:'v1', status:'done', link:'#pb-uls-bend' },
+        { id:'pb-uls-bend', label:'Bending', /*ver:'v1',*/ status:'done', link:'#pb-uls-bend' },
       ]},
       { id:'pb-ulsfire', label:'ULS Fire', children:[
-        { id:'pb-ulsfire-bend', label:'Bending', ver:'v1', status:'done', link:'#pb-ulsfire-bend' },
+        { id:'pb-ulsfire-bend', label:'Bending', /*ver:'v1',*/ status:'done', link:'#pb-ulsfire-bend' },
       ]},
       { id:'pb-sls', label:'SLS', children:[
-        { id:'pb-sls-defl', label:'Deflection', ver:'v1', status:'done', link:'#pb-sls-defl' },
+        { id:'pb-sls-defl', label:'Deflection', /*ver:'v1',*/ status:'done', link:'#pb-sls-defl' },
       ]},
-      { id:'pb-v2', label:'ULS', children:[
+      /*{ id:'pb-v2', label:'ULS', children:[
         { id:'pb-v2-shear', label:'Shear', ver:'v2', status:'onhold', link:'#pb-v2-shear' },
-      ]},
+      ]},*/
     ]},
     { id:'delta-beam', label:'Composite beam Delta', children:[
       { id:'db-uls', label:'ULS', children:[
-        { id:'db-uls-bend',  label:'Bending', ver:'v1', status:'methodology', link:'#db-uls-bend' },
-        { id:'db-uls-shear', label:'Shear',   ver:'v2', status:'onhold',        link:'#db-uls-shear' },
+        { id:'db-uls-bend',  label:'Bending', /*ver:'v1',*/ status:'methodology', link:'#db-uls-bend' },
+        /*{ id:'db-uls-shear', label:'Shear', ver:'v2', status:'onhold', link:'#db-uls-shear' },*/
       ]},
       { id:'db-ulsfire', label:'ULS Fire', children:[
-        { id:'db-ulsfire-bend', label:'Bending', ver:'v1', status:'code', link:'#db-ulsfire-bend' },
+        { id:'db-ulsfire-bend', label:'Bending', /*ver:'v1',*/ status:'dev', link:'#db-ulsfire-bend' },
       ]},
       { id:'db-sls', label:'SLS', children:[
-        { id:'db-sls-defl', label:'Deflection', ver:'v1', status:'methodology', link:'#db-sls-defl' },
+        { id:'db-sls-defl', label:'Deflection', /*ver:'v1',*/ status:'methodology', link:'#db-sls-defl' },
       ]},
     ]},
   ]},
   { id:'columns', label:'Columns', children:[
     { id:'glulam-col', label:'Glulam column', children:[
       { id:'gc-uls', label:'ULS', children:[
-        { id:'gc-uls-bend',  label:'Bending', ver:'v1', status:'code',    link:'#gc-uls-bend' },
-        { id:'gc-uls-shear', label:'Shear',   ver:'v2', status:'onhold',    link:'#gc-uls-shear' },
+        { id:'gc-uls-bend',  label:'Bending', /*ver:'v1',*/ status:'dev', link:'#gc-uls-bend' },
+        /*{ id:'gc-uls-shear', label:'Shear', ver:'v2', status:'onhold', link:'#gc-uls-shear' },*/
       ]},
       { id:'gc-ulsfire', label:'ULS Fire', children:[
-        { id:'gc-ulsfire-bend', label:'Bending', ver:'v1', status:'code', link:'#gc-ulsfire-bend' },
+        { id:'gc-ulsfire-bend', label:'Bending', /*ver:'v1',*/ status:'dev', link:'#gc-ulsfire-bend' },
       ]},
       { id:'gc-sls', label:'SLS', children:[
-        { id:'gc-sls-defl', label:'Deflection', ver:'v1', status:'methodology', link:'#gc-sls-defl' },
+        { id:'gc-sls-defl', label:'Deflection', /*ver:'v1',*/ status:'methodology', link:'#gc-sls-defl' },
       ]},
     ]},
   ]},
@@ -160,9 +164,9 @@ function leaves(n){ return n.children ? n.children.flatMap(leaves) : [n]; }
 
 function groupStatus(n){
   const ls = leaves(n);
-  if(ls.every(x=>x.status==='done')) return 'done';
+  if(ls.every(x=>x.status==='done'))   return 'done';
   if(ls.every(x=>x.status==='onhold')) return 'onhold';
-  if(ls.every(x=>x.status==='todo')) return 'todo';
+  if(ls.every(x=>x.status==='todo'))   return 'todo';
   return 'wip';
 }
 
@@ -186,7 +190,6 @@ function buildNode(n, depth){
   inner += `</span>`;
 
   if(!isGroup){
-    inner += `<span class="ver ver-${n.ver}">${n.ver}</span>`;
     inner += `<span class="badge b-${sCls(n.status)}">${sLabel(n.status)}</span>`;
   } else {
     inner += `<div class="mini"><div class="mini-f" style="width:${pct}%"></div></div>
@@ -203,28 +206,19 @@ function buildNode(n, depth){
 
 function updateStats(){
   const all = data.flatMap(leaves);
-  const v1 = all.filter(x=>x.ver==='v1');
-  const v2 = all.filter(x=>x.ver==='v2');
-  const d1 = v1.filter(x=>x.status==='done').length;
-  const d2 = v2.filter(x=>x.status==='done').length;
-  const p1 = v1.length ? Math.round(d1/v1.length*100) : 0;
-  const p2 = v2.length ? Math.round(d2/v2.length*100) : 0;
+  const done = all.filter(x=>x.status==='done').length;
+  const total = all.length;
+  const pct = total ? Math.round(done/total*100) : 0;
 
-  document.getElementById('bar-v1').style.width = p1+'%';
-  document.getElementById('bar-v2').style.width = p2+'%';
-  document.getElementById('done-v1').textContent = d1;
-  document.getElementById('done-v2').textContent = d2;
-  document.getElementById('total-v1').textContent = v1.length;
-  document.getElementById('total-v2').textContent = v2.length;
+  document.getElementById('bar-all').style.width = pct+'%';
+  document.getElementById('done-all').textContent = done;
+  document.getElementById('total-all').textContent = total;
 
-  function breakdown(arr){
-    return STATUSES.filter(s=>s.key!=='done').map(s=>{
-      const c = arr.filter(x=>x.status===s.key).length;
-      return c>0 ? `${c} ${s.label}` : null;
-    }).filter(Boolean).join(' · ');
-  }
-  document.getElementById('breakdown-v1').textContent = breakdown(v1);
-  document.getElementById('breakdown-v2').textContent = breakdown(v2);
+  const parts = STATUSES.filter(s=>s.key!=='done').map(s=>{
+    const c = all.filter(x=>x.status===s.key).length;
+    return c>0 ? `${c} ${s.label}` : null;
+  }).filter(Boolean).join(' · ');
+  document.getElementById('breakdown-all').textContent = parts;
 }
 
 function render(){
