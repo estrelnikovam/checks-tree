@@ -103,7 +103,12 @@ const data = [
   { id:'beams', label:'Beams', children:[
     { id:'glulam-beam', label:'Glulam beam', children:[
       { id:'gb-uls', label:'ULS', children:[
-        { id:'gb-uls-bend', label:'Bending', /*ver:'v1',*/ status:'done', link:'#gb-uls-bend' },
+        { id:'gb-uls-bend',     label:'Bending',              /*ver:'v1',*/ status:'done',        link:'#gb-uls-bend' },
+        { id:'gb-uls-ten-par',  label:'Tension ∥ grain',      /*ver:'v1',*/ status:'analysis',    link:'#gb-uls-ten-par' },
+        { id:'gb-uls-ten-perp', label:'Tension ⊥ grain',      /*ver:'v1',*/ status:'methodology', link:'#gb-uls-ten-perp' },
+        { id:'gb-uls-com-par',  label:'Compression ∥ grain',  /*ver:'v1',*/ status:'methodology', link:'#gb-uls-com-par' },
+        { id:'gb-uls-com-perp', label:'Compression ⊥ grain',  /*ver:'v1',*/ status:'methodology', link:'#gb-uls-com-perp' },
+        { id:'gb-uls-shear',    label:'Shear',                /*ver:'v1',*/ status:'done',        link:'#gb-uls-shear' },
       ]},
       { id:'gb-ulsfire', label:'ULS Fire', children:[
         { id:'gb-ulsfire-bend', label:'Bending', /*ver:'v1',*/ status:'done', link:'#gb-ulsfire-bend' },
@@ -117,7 +122,12 @@ const data = [
     ]},
     { id:'pfeifer-beam', label:'Composite beam Pfeifer', children:[
       { id:'pb-uls', label:'ULS', children:[
-        { id:'pb-uls-bend', label:'Bending', /*ver:'v1',*/ status:'done', link:'#pb-uls-bend' },
+        { id:'pb-uls-bend',     label:'Bending',              /*ver:'v1',*/ status:'done',        link:'#pb-uls-bend' },
+        { id:'pb-uls-ten-par',  label:'Tension ∥ grain',      /*ver:'v1',*/ status:'analysis',    link:'#pb-uls-ten-par' },
+        { id:'pb-uls-ten-perp', label:'Tension ⊥ grain',      /*ver:'v1',*/ status:'methodology', link:'#pb-uls-ten-perp' },
+        { id:'pb-uls-com-par',  label:'Compression ∥ grain',  /*ver:'v1',*/ status:'methodology', link:'#pb-uls-com-par' },
+        { id:'pb-uls-com-perp', label:'Compression ⊥ grain',  /*ver:'v1',*/ status:'methodology', link:'#pb-uls-com-perp' },
+        { id:'pb-uls-shear',    label:'Shear',                /*ver:'v1',*/ status:'done',        link:'#pb-uls-shear' },
       ]},
       { id:'pb-ulsfire', label:'ULS Fire', children:[
         { id:'pb-ulsfire-bend', label:'Bending', /*ver:'v1',*/ status:'done', link:'#pb-ulsfire-bend' },
