@@ -103,78 +103,172 @@ const data = [
   { id:'beams', label:'Beams', children:[
     { id:'glulam-beam', label:'Glulam beam', children:[
       { id:'gb-uls', label:'ULS', children:[
-        { id:'gb-uls-bend',     label:'Bending',             /*ver:'v1',*/ status:'done',   link:'#gb-uls-bend' },
-        { id:'gb-uls-shear',    label:'Shear',               /*ver:'v1',*/ status:'done',   link:'#gb-uls-shear' },
-        { id:'gb-uls-ten-par',  label:'Tension ∥ grain',     /*ver:'v1',*/ status:'onhold', link:'#gb-uls-ten-par' },
-        { id:'gb-uls-ten-perp', label:'Tension ⊥ grain',     /*ver:'v1',*/ status:'onhold', link:'#gb-uls-ten-perp' },
-        { id:'gb-uls-com-par',  label:'Compression ∥ grain', /*ver:'v1',*/ status:'onhold', link:'#gb-uls-com-par' },
+        { id:'gb-uls-bend', label:'Bending', /*ver:'v1',*/ status:'done', link:'#gb-uls-bend' },
+        { id:'gb-uls-shear', label:'Shear', /*ver:'v1',*/ status:'done', link:'#gb-uls-shear' },
+        { id:'gb-uls-ten-par', label:'Tension ∥ grain', /*ver:'v1',*/ status:'onhold', link:'#gb-uls-ten-par' },
+        { id:'gb-uls-ten-perp', label:'Tension ⊥ grain', /*ver:'v1',*/ status:'onhold', link:'#gb-uls-ten-perp' },
+        { id:'gb-uls-com-par', label:'Compression ∥ grain', /*ver:'v1',*/ status:'onhold', link:'#gb-uls-com-par' },
       ]},
       { id:'gb-ulsfire', label:'ULS Fire', children:[
-        { id:'gb-ulsfire-bend',     label:'Bending',             /*ver:'v1',*/ status:'done',   link:'#gb-ulsfire-bend' },
-        { id:'gb-ulsfire-shear',    label:'Shear',               /*ver:'v1',*/ status:'done',   link:'#gb-ulsfire-shear' },
-        { id:'gb-ulsfire-ten-par',  label:'Tension ∥ grain',     /*ver:'v1',*/ status:'onhold', link:'#gb-ulsfire-ten-par' },
-        { id:'gb-ulsfire-ten-perp', label:'Tension ⊥ grain',     /*ver:'v1',*/ status:'onhold', link:'#gb-ulsfire-ten-perp' },
-        { id:'gb-ulsfire-com-par',  label:'Compression ∥ grain', /*ver:'v1',*/ status:'onhold', link:'#gb-ulsfire-com-par' },
+        { id:'gb-ulsfire-bend', label:'Bending', /*ver:'v1',*/ status:'done', link:'#gb-ulsfire-bend' },
+        { id:'gb-ulsfire-shear', label:'Shear', /*ver:'v1',*/ status:'done', link:'#gb-ulsfire-shear' },
+        { id:'gb-ulsfire-ten-par', label:'Tension ∥ grain', /*ver:'v1',*/ status:'onhold', link:'#gb-ulsfire-ten-par' },
+        { id:'gb-ulsfire-ten-perp', label:'Tension ⊥ grain', /*ver:'v1',*/ status:'onhold', link:'#gb-ulsfire-ten-perp' },
+        { id:'gb-ulsfire-com-par', label:'Compression ∥ grain', /*ver:'v1',*/ status:'onhold', link:'#gb-ulsfire-com-par' },
       ]},
       { id:'gb-sls', label:'SLS', children:[
-        { id:'gb-sls-inst',  label:'Instantaneous deflection', /*ver:'v1',*/ status:'done',   link:'#gb-sls-inst' },
-        { id:'gb-sls-final', label:'Final deflection',         /*ver:'v1',*/ status:'done',   link:'#gb-sls-final' },
-        { id:'gb-sls-net',   label:'Net final deflection',     /*ver:'v1',*/ status:'done',   link:'#gb-sls-net' },
-        { id:'gb-sls-vib',   label:'Vibration',                /*ver:'v1',*/ status:'onhold', link:'#gb-sls-vib' },
+        { id:'gb-sls-inst', label:'Instantaneous deflection', /*ver:'v1',*/ status:'done', link:'#gb-sls-inst' },
+        { id:'gb-sls-final', label:'Final deflection', /*ver:'v1',*/ status:'done', link:'#gb-sls-final' },
+        { id:'gb-sls-net', label:'Net final deflection', /*ver:'v1',*/ status:'done', link:'#gb-sls-net' },
+        { id:'gb-sls-vib', label:'Vibration', /*ver:'v1',*/ status:'onhold', link:'#gb-sls-vib' },
       ]},
-      /*{ id:'gb-vib', label:'Vibration', children:[
-        { id:'gb-vib-1', label:'Vibration check', ver:'v2', status:'onhold', link:'#gb-vib-1' },
-      ]},*/
     ]},
     { id:'pfeifer-beam', label:'Composite beam Pfeifer', children:[
       { id:'pb-uls', label:'ULS', children:[
-        { id:'pb-uls-bend',     label:'Bending',              /*ver:'v1',*/ status:'done',        link:'#pb-uls-bend' },
-        { id:'pb-uls-ten-par',  label:'Tension ∥ grain',      /*ver:'v1',*/ status:'analysis',    link:'#pb-uls-ten-par' },
-        { id:'pb-uls-ten-perp', label:'Tension ⊥ grain',      /*ver:'v1',*/ status:'methodology', link:'#pb-uls-ten-perp' },
-        { id:'pb-uls-com-par',  label:'Compression ∥ grain',  /*ver:'v1',*/ status:'methodology', link:'#pb-uls-com-par' },
-        { id:'pb-uls-com-perp', label:'Compression ⊥ grain',  /*ver:'v1',*/ status:'methodology', link:'#pb-uls-com-perp' },
-        { id:'pb-uls-shear',    label:'Shear',                /*ver:'v1',*/ status:'done',        link:'#pb-uls-shear' },
+        { id:'pb-uls-bend', label:'Bending', /*ver:'v1',*/ status:'analysis', link:'#pb-uls-bend' },
+        { id:'pb-uls-shear', label:'Shear', /*ver:'v1',*/ status:'methodology', link:'#pb-uls-shear' },
       ]},
       { id:'pb-ulsfire', label:'ULS Fire', children:[
-        { id:'pb-ulsfire-bend', label:'Bending', /*ver:'v1',*/ status:'done', link:'#pb-ulsfire-bend' },
+        { id:'pb-ulsfire-bend', label:'Bending', /*ver:'v1',*/ status:'methodology', link:'#pb-ulsfire-bend' },
+        { id:'pb-ulsfire-shear', label:'Shear', /*ver:'v1',*/ status:'methodology', link:'#pb-ulsfire-shear' },
       ]},
       { id:'pb-sls', label:'SLS', children:[
-        { id:'pb-sls-defl', label:'Deflection', /*ver:'v1',*/ status:'done', link:'#pb-sls-defl' },
-      ]},
-      /*{ id:'pb-v2', label:'ULS', children:[
-        { id:'pb-v2-shear', label:'Shear', ver:'v2', status:'onhold', link:'#pb-v2-shear' },
-      ]},*/
-    ]},
-    { id:'delta-beam', label:'Composite beam Delta', children:[
-      { id:'db-uls', label:'ULS', children:[
-        { id:'db-uls-bend',  label:'Bending', /*ver:'v1',*/ status:'methodology', link:'#db-uls-bend' },
-        /*{ id:'db-uls-shear', label:'Shear', ver:'v2', status:'onhold', link:'#db-uls-shear' },*/
-      ]},
-      { id:'db-ulsfire', label:'ULS Fire', children:[
-        { id:'db-ulsfire-bend', label:'Bending', /*ver:'v1',*/ status:'dev', link:'#db-ulsfire-bend' },
-      ]},
-      { id:'db-sls', label:'SLS', children:[
-        { id:'db-sls-defl', label:'Deflection', /*ver:'v1',*/ status:'methodology', link:'#db-sls-defl' },
+        { id:'pb-sls-inst', label:'Instantaneous deflection', /*ver:'v1',*/ status:'onhold', link:'#pb-sls-inst' },
+        { id:'pb-sls-final', label:'Final deflection', /*ver:'v1',*/ status:'onhold', link:'#pb-sls-final' },
+        { id:'pb-sls-net', label:'Net final deflection', /*ver:'v1',*/ status:'onhold', link:'#pb-sls-net' },
+        { id:'pb-sls-vib', label:'Vibration', /*ver:'v1',*/ status:'onhold', link:'#pb-sls-vib' },
       ]},
     ]},
   ]},
   { id:'columns', label:'Columns', children:[
     { id:'glulam-col', label:'Glulam column', children:[
       { id:'gc-uls', label:'ULS', children:[
-        { id:'gc-uls-bend',  label:'Bending', /*ver:'v1',*/ status:'dev', link:'#gc-uls-bend' },
-        /*{ id:'gc-uls-shear', label:'Shear', ver:'v2', status:'onhold', link:'#gc-uls-shear' },*/
+        { id:'gc-uls-shear', label:'Shear', /*ver:'v1',*/ status:'done', link:'#gc-uls-shear' },
+        { id:'gc-uls-compr', label:'Combined compression', /*ver:'v1',*/ status:'done', link:'#gc-uls-compr' },
+        { id:'gc-uls-buck', label:'Buckling', /*ver:'v1',*/ status:'done', link:'#gc-uls-buck' },
+        { id:'gc-uls-ltb', label:'Lateral torsional buckling', /*ver:'v1',*/ status:'done', link:'#gc-uls-ltb' },
       ]},
       { id:'gc-ulsfire', label:'ULS Fire', children:[
-        { id:'gc-ulsfire-bend', label:'Bending', /*ver:'v1',*/ status:'dev', link:'#gc-ulsfire-bend' },
+        { id:'gc-ulsfire-shear', label:'Shear', /*ver:'v1',*/ status:'done', link:'#gc-ulsfire-shear' },
+        { id:'gc-ulsfire-compr', label:'Combined compression', /*ver:'v1',*/ status:'done', link:'#gc-ulsfire-compr' },
+        { id:'gc-ulsfire-buck', label:'Buckling', /*ver:'v1',*/ status:'done', link:'#gc-ulsfire-buck' },
+        { id:'gc-ulsfire-ltb', label:'Lateral torsional buckling', /*ver:'v1',*/ status:'done', link:'#gc-ulsfire-ltb' },
       ]},
       { id:'gc-sls', label:'SLS', children:[
-        { id:'gc-sls-defl', label:'Deflection', /*ver:'v1',*/ status:'methodology', link:'#gc-sls-defl' },
+        { id:'gc-sls-vib', label:'Vibration', /*ver:'v1',*/ status:'onhold', link:'#gc-sls-vib' },
+      ]},
+    ]},
+  ]},
+  { id:'slabs', label:'Slabs', children:[
+    { id:'clt-slab', label:'CLT', children:[
+      { id:'clt-uls', label:'ULS', children:[
+        { id:'clt-uls-bend', label:'Bending', /*ver:'v1',*/ status:'done', link:'#clt-uls-bend' },
+        { id:'clt-uls-shear', label:'Shear', /*ver:'v1',*/ status:'done', link:'#clt-uls-shear' },
+        { id:'clt-uls-ten-par', label:'Tension ∥ grain', /*ver:'v1',*/ status:'onhold', link:'#clt-uls-ten-par' },
+        { id:'clt-uls-ten-perp', label:'Tension ⊥ grain', /*ver:'v1',*/ status:'onhold', link:'#clt-uls-ten-perp' },
+        { id:'clt-uls-com-par', label:'Compression ∥ grain', /*ver:'v1',*/ status:'onhold', link:'#clt-uls-com-par' },
+        { id:'clt-uls-com-perp', label:'Compression ⊥ grain', /*ver:'v1',*/ status:'onhold', link:'#clt-uls-com-perp' },
+        { id:'clt-uls-rolling', label:'Rolling shear', /*ver:'v1',*/ status:'onhold', link:'#clt-uls-rolling' },
+      ]},
+      { id:'clt-ulsfire', label:'ULS Fire', children:[
+        { id:'clt-ulsfire-bend', label:'Bending', /*ver:'v1',*/ status:'done', link:'#clt-ulsfire-bend' },
+        { id:'clt-ulsfire-shear', label:'Shear', /*ver:'v1',*/ status:'done', link:'#clt-ulsfire-shear' },
+        { id:'clt-ulsfire-ten-par', label:'Tension ∥ grain', /*ver:'v1',*/ status:'onhold', link:'#clt-ulsfire-ten-par' },
+        { id:'clt-ulsfire-ten-perp', label:'Tension ⊥ grain', /*ver:'v1',*/ status:'onhold', link:'#clt-ulsfire-ten-perp' },
+        { id:'clt-ulsfire-com-par', label:'Compression ∥ grain', /*ver:'v1',*/ status:'onhold', link:'#clt-ulsfire-com-par' },
+        { id:'clt-ulsfire-com-perp', label:'Compression ⊥ grain', /*ver:'v1',*/ status:'onhold', link:'#clt-ulsfire-com-perp' },
+        { id:'clt-ulsfire-rolling', label:'Rolling shear', /*ver:'v1',*/ status:'onhold', link:'#clt-ulsfire-rolling' },
+      ]},
+      { id:'clt-sls', label:'SLS', children:[
+        { id:'clt-sls-inst', label:'Instantaneous deflection', /*ver:'v1',*/ status:'done', link:'#clt-sls-inst' },
+        { id:'clt-sls-final', label:'Final deflection', /*ver:'v1',*/ status:'done', link:'#clt-sls-final' },
+        { id:'clt-sls-net', label:'Net final deflection', /*ver:'v1',*/ status:'done', link:'#clt-sls-net' },
+        { id:'clt-sls-vib', label:'Vibration', /*ver:'v1',*/ status:'onhold', link:'#clt-sls-vib' },
+      ]},
+    ]},
+    { id:'tcc-slab', label:'TCC', children:[
+      { id:'tcc-uls', label:'ULS', children:[
+        { id:'tcc-uls-bend-inst', label:'Bending instantaneous', /*ver:'v1',*/ status:'done', link:'#tcc-uls-bend-inst' },
+        { id:'tcc-uls-bend-50y', label:'Bending in 50 years', /*ver:'v1',*/ status:'done', link:'#tcc-uls-bend-50y' },
+        { id:'tcc-uls-bend-50y-shr', label:'Bending in 50 years with shrinkage', /*ver:'v1',*/ status:'done', link:'#tcc-uls-bend-50y-shr' },
+        { id:'tcc-uls-bend-50y-com', label:'Bending in 50 years combined', /*ver:'v1',*/ status:'done', link:'#tcc-uls-bend-50y-com' },
+        { id:'tcc-uls-shear', label:'Shear', /*ver:'v1',*/ status:'done', link:'#tcc-uls-shear' },
+      ]},
+      { id:'tcc-ulsfire', label:'ULS Fire', children:[
+        { id:'tcc-ulsfire-bend-inst', label:'Bending instantaneous', /*ver:'v1',*/ status:'done', link:'#tcc-ulsfire-bend-inst' },
+        { id:'tcc-ulsfire-bend-50y', label:'Bending in 50 years', /*ver:'v1',*/ status:'done', link:'#tcc-ulsfire-bend-50y' },
+        { id:'tcc-ulsfire-bend-50y-shr', label:'Bending in 50 years with shrinkage', /*ver:'v1',*/ status:'done', link:'#tcc-ulsfire-bend-50y-shr' },
+        { id:'tcc-ulsfire-bend-50y-com', label:'Bending in 50 years combined', /*ver:'v1',*/ status:'done', link:'#tcc-ulsfire-bend-50y-com' },
+        { id:'tcc-ulsfire-shear', label:'Shear', /*ver:'v1',*/ status:'done', link:'#tcc-ulsfire-shear' },
+      ]},
+      { id:'tcc-sls', label:'SLS', children:[
+        { id:'tcc-sls-inst', label:'Instantaneous deflection', /*ver:'v1',*/ status:'done', link:'#tcc-sls-inst' },
+        { id:'tcc-sls-walls', label:'Deflection with walls', /*ver:'v1',*/ status:'done', link:'#tcc-sls-walls' },
+        { id:'tcc-sls-final', label:'Final deflection', /*ver:'v1',*/ status:'done', link:'#tcc-sls-final' },
+        { id:'tcc-sls-net', label:'Net final deflection', /*ver:'v1',*/ status:'done', link:'#tcc-sls-net' },
+        { id:'tcc-sls-vib', label:'Vibration', /*ver:'v1',*/ status:'onhold', link:'#tcc-sls-vib' },
+      ]},
+    ]},
+  ]},
+  { id:'walls', label:'Walls', children:[
+    { id:'clt-wall', label:'CLT', children:[
+      { id:'clt-wall-uls', label:'ULS', children:[
+        { id:'clt-wall-uls-bend-in', label:'Bending in-plane', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-uls-bend-in' },
+        { id:'clt-wall-uls-bend-out', label:'Bending out-of-plane', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-uls-bend-out' },
+        { id:'clt-wall-uls-com-par', label:'Compression ∥ grain', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-uls-com-par' },
+        { id:'clt-wall-uls-com-perp', label:'Compression ⊥ grain', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-uls-com-perp' },
+        { id:'clt-wall-uls-shear', label:'Shear (in-plane)', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-uls-shear' },
+        { id:'clt-wall-uls-rolling', label:'Rolling shear', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-uls-rolling' },
+        { id:'clt-wall-uls-buck', label:'Buckling (out-of-plane)', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-uls-buck' },
+        { id:'clt-wall-uls-combined', label:'Combined compression and bending', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-uls-combined' },
+      ]},
+      { id:'clt-wall-ulsfire', label:'ULS Fire', children:[
+        { id:'clt-wall-ulsfire-bend-in', label:'Bending in-plane', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-ulsfire-bend-in' },
+        { id:'clt-wall-ulsfire-bend-out', label:'Bending out-of-plane', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-ulsfire-bend-out' },
+        { id:'clt-wall-ulsfire-com-par', label:'Compression ∥ grain', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-ulsfire-com-par' },
+        { id:'clt-wall-ulsfire-com-perp', label:'Compression ⊥ grain', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-ulsfire-com-perp' },
+        { id:'clt-wall-ulsfire-shear', label:'Shear (in-plane)', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-ulsfire-shear' },
+        { id:'clt-wall-ulsfire-rolling', label:'Rolling shear', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-ulsfire-rolling' },
+        { id:'clt-wall-ulsfire-buck', label:'Buckling (out-of-plane)', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-ulsfire-buck' },
+        { id:'clt-wall-ulsfire-combined', label:'Combined compression and bending', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-ulsfire-combined' },
+      ]},
+      { id:'clt-wall-sls', label:'SLS', children:[
+        { id:'clt-wall-sls-in', label:'In-plane deflection', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-sls-in' },
+        { id:'clt-wall-sls-out', label:'Out-of-plane deflection', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-sls-out' },
+        { id:'clt-wall-sls-vib', label:'Vibration', /*ver:'v1',*/ status:'onhold', link:'#clt-wall-sls-vib' },
+      ]},
+    ]},
+    { id:'conc-wall', label:'Concrete', children:[
+      { id:'conc-wall-uls', label:'ULS', children:[
+        { id:'conc-wall-uls-bend-in', label:'Bending in-plane', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-uls-bend-in' },
+        { id:'conc-wall-uls-bend-out', label:'Bending out-of-plane', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-uls-bend-out' },
+        { id:'conc-wall-uls-axial', label:'Axial compression', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-uls-axial' },
+        { id:'conc-wall-uls-combined', label:'Combined axial and bending', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-uls-combined' },
+        { id:'conc-wall-uls-shear', label:'Shear', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-uls-shear' },
+        { id:'conc-wall-uls-punch', label:'Punching shear', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-uls-punch' },
+        { id:'conc-wall-uls-buck', label:'Buckling (slender walls)', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-uls-buck' },
+        { id:'conc-wall-uls-crack', label:'Crack width (ULS)', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-uls-crack' },
+      ]},
+      { id:'conc-wall-ulsfire', label:'ULS Fire', children:[
+        { id:'conc-wall-ulsfire-bend-in', label:'Bending in-plane', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-ulsfire-bend-in' },
+        { id:'conc-wall-ulsfire-bend-out', label:'Bending out-of-plane', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-ulsfire-bend-out' },
+        { id:'conc-wall-ulsfire-axial', label:'Axial compression', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-ulsfire-axial' },
+        { id:'conc-wall-ulsfire-combined', label:'Combined axial and bending', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-ulsfire-combined' },
+        { id:'conc-wall-ulsfire-shear', label:'Shear', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-ulsfire-shear' },
+        { id:'conc-wall-ulsfire-buck', label:'Buckling (slender walls)', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-ulsfire-buck' },
+      ]},
+      { id:'conc-wall-sls', label:'SLS', children:[
+        { id:'conc-wall-sls-defl-in', label:'In-plane deflection', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-sls-defl-in' },
+        { id:'conc-wall-sls-defl-out', label:'Out-of-plane deflection', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-sls-defl-out' },
+        { id:'conc-wall-sls-crack', label:'Crack width', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-sls-crack' },
+        { id:'conc-wall-sls-stress', label:'Stress limitation', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-sls-stress' },
+        { id:'conc-wall-sls-vib', label:'Vibration', /*ver:'v1',*/ status:'onhold', link:'#conc-wall-sls-vib' },
       ]},
     ]},
   ]},
 ];
 
-const collapsed = new Set(['glulam-beam','pfeifer-beam','delta-beam','glulam-col']);
+const collapsed = new Set(['glulam-beam','pfeifer-beam','glulam-col','clt-slab','tcc-slab','clt-wall','conc-wall']);
 
 function leaves(n){ return n.children ? n.children.flatMap(leaves) : [n]; }
 
