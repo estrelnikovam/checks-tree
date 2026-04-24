@@ -66,6 +66,37 @@ li.tnode { padding: 0; }
   pointer-events: none;
 }
 .info-icon:hover .tip { visibility: visible; opacity: 1; }
+
+.req-star { color: #d97706; font-size: 12px; font-weight: 700; margin-right: 4px; }
+
+.row { position: relative; }
+.ec-tip {
+  visibility: hidden; opacity: 0;
+  background: #1a3a5c; color: #fff;
+  font-size: 11px; line-height: 1.4;
+  border-radius: 6px; padding: 6px 9px;
+  position: absolute; z-index: 100;
+  left: 36px; top: 100%;
+  max-width: 460px; width: max-content;
+  pointer-events: none;
+  transition: opacity .15s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.row:hover .ec-tip { visibility: visible; opacity: 1; }
+
+.description { background: #f9f9f7; border-radius: 8px; padding: 10px 16px; margin-bottom: 1.25rem; font-size: 13px; line-height: 1.55; }
+.description summary { cursor: pointer; font-weight: 500; color: #1a1a1a; padding: 2px 0; user-select: none; list-style: none; }
+.description summary::-webkit-details-marker { display: none; }
+.description[open] summary::before { content: "▾ "; color: #888; }
+.description:not([open]) summary::before { content: "▸ "; color: #888; }
+.desc-body { color: #444; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e8e8e4; }
+.desc-body p { margin-bottom: 10px; }
+.desc-body p:last-child { margin-bottom: 0; }
+.desc-body ul { margin-left: 20px; margin-top: 6px; margin-bottom: 0; }
+.desc-body li { margin-bottom: 6px; }
+.desc-body strong { color: #1a1a1a; font-weight: 500; }
+.desc-body em { color: #666; font-style: italic; }
+.desc-star { color: #d97706; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -118,155 +149,8 @@ const STATUSES = [
 function sCls(key){ return (STATUSES.find(x=>x.key===key)||{cls:'todo'}).cls; }
 function sLabel(key){ return (STATUSES.find(x=>x.key===key)||{label:key}).label; }
 
-const data = [
-  { id:'beams', label:'Beams', children:[
-
-    { id:'glulam-beam', label:'Glulam beam', children:[
-      { id:'gb-loads', label:'Load types', children:[
-        { id:'gb-load-udl',   label:'UDL',        status:'done' },
-        { id:'gb-load-vdl',   label:'VDL',        status:'onhold' },
-        { id:'gb-load-point', label:'Point load',  status:'onhold' },
-        { id:'gb-load-torsion',   label:'Direct torsion',   status:'onhold' },
-      ]},
-      { id:'gb-uls', label:'ULS', children:[
-        { id:'gb-uls-bend',    label:'Bending (pure)',              status:'done', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.1.6:Bending(noaxial)' },
-        { id:'gb-uls-shear',   label:'Shear',                       status:'done', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.1.7:Shear' },
-        { id:'gb-uls-com-perp',label:'Compression ⊥ grain (bearing)', status:'onhold', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.1.5:Compressionperpendiculartograin(bearing)' },
-        { id:'gb-uls-comb-bc', label:'Combined bending/compression',status:'onhold', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.2.4:Combinedbendingandcompression' , info:'Only needed when the beam has moment + axial compression together.'},
-        { id:'gb-uls-ltb',     label:'Lateral torsional buckling',  status:'onhold', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.3.3:Beamssubjectedbendingorcombinedbendingandcompression' , info:'Required if the compression edge is not adequately laterally restrained. If full restraint is proven, this check may be omitted.'},
-        { id:'gb-uls-torsion', label:'Torsion',                     status:'onhold', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.1.8:Torsion' },
-      ]},
-      { id:'gb-ulsfire', label:'ULS Fire', children:[
-        { id:'gb-ulsfire-bend',    label:'Bending (pure)',              status:'done', info:'Only needed when the member must satisfy a fire resistance requirement such as R30/R60/R90. Fire design is a separate accidental situation.' },
-        { id:'gb-ulsfire-shear',   label:'Shear',                       status:'done', info:'Only needed if fire design is part of the scope.' },
-        { id:'gb-ulsfire-comb-bc', label:'Combined bending/compression',status:'onhold', info:'Only needed in fire design and only if moment + axial compression act together.' },
-        { id:'gb-ulsfire-ltb',     label:'Lateral torsional buckling',  status:'onhold' },
-        { id:'gb-ulsfire-torsion', label:'Torsion',                     status:'onhold' },
-      ]},
-      { id:'gb-sls', label:'SLS', children:[
-        { id:'gb-sls-inst',  label:'Deflection (winst)',    status:'done', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-Designprocess–SLS(deflection)' },
-        { id:'gb-sls-final', label:'Deflection (wnet,fin)', status:'done' },
-      ]},
-    ]},
-
-    { id:'pfeifer-beam', label:'Composite beam Pfeifer', children:[
-      { id:'pb-loads', label:'Load types', children:[
-        { id:'pb-load-udl',   label:'UDL',       status:'analysis', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1617068037/PFEIFER+Hybridbeam+preselection+calculator' },
-        { id:'pb-load-vdl',   label:'VDL',       status:'onhold' },
-        { id:'pb-load-point', label:'Point load', status:'onhold' },
-      ]},
-      { id:'pb-uls', label:'ULS', children:[
-        { id:'pb-uls-bend',  label:'Bending', status:'analysis',    link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1617068037/PFEIFER+Hybridbeam+preselection+calculator#PFEIFERHybridbeampreselectioncalculator-ULSverification' },
-        { id:'pb-uls-shear', label:'Shear',   status:'methodology', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1617068037/PFEIFER+Hybridbeam+preselection+calculator#PFEIFERHybridbeampreselectioncalculator-ULSverification' },
-      ]},
-      { id:'pb-ulsfire', label:'ULS Fire', children:[
-        { id:'pb-ulsfire-bend',  label:'Bending', status:'methodology', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1617068037/PFEIFER+Hybridbeam+preselection+calculator' },
-        { id:'pb-ulsfire-shear', label:'Shear',   status:'methodology', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1617068037/PFEIFER+Hybridbeam+preselection+calculator' },
-      ]},
-      { id:'pb-sls', label:'SLS', children:[
-        { id:'pb-sls-inst',  label:'Deflection (winst)',    status:'onhold', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1617068037/PFEIFER+Hybridbeam+preselection+calculator#PFEIFERHybridbeampreselectioncalculator-SLS-Deflectionsandvibrationserviceability' },
-        { id:'pb-sls-final', label:'Deflection (wnet,fin)', status:'onhold', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1617068037/PFEIFER+Hybridbeam+preselection+calculator#PFEIFERHybridbeampreselectioncalculator-SLS-Deflectionsandvibrationserviceability' },
-      ]},
-    ]},
-
-  ]},
-
-  { id:'columns', label:'Columns', children:[
-
-    { id:'glulam-col', label:'Glulam column', children:[
-      { id:'gc-loads', label:'Load types', children:[
-        { id:'gc-load-point', label:'Point load', status:'onhold' },
-      ]},
-      { id:'gc-uls', label:'ULS', children:[
-        { id:'gc-uls-com-par', label:'Compression ∥ grain',         status:'onhold', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.1.4:Compressionparalleltothegrain' },
-        { id:'gc-uls-com-perp',label:'Compression ⊥ grain (bearing)', status:'onhold', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.1.5:Compressionperpendiculartograin(bearing)' , info:'Usually not a standard column member check; this is more a local bearing/detail issue if applicable.'},
-        { id:'gc-uls-comb-bc', label:'Combined bending/compression',      status:'done', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.2.4:Combinedbendingandcompression' },
-        { id:'gc-uls-buck',    label:'Buckling',                          status:'done', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.3.2:Columnssubjectedtoeithercompressionorcombinedcompressionandbending' },
-      ]},
-      { id:'gc-ulsfire', label:'ULS Fire', children:[
-        { id:'gc-ulsfire-com-par', label:'Compression ∥ grain',         status:'onhold' },
-        { id:'gc-ulsfire-comb-bc', label:'Combined bending/compression',      status:'done' },
-        { id:'gc-ulsfire-buck',    label:'Buckling',                          status:'done' },
-      ]},
-    ]},
-
-  ]},
-
-  { id:'slabs', label:'Slabs', children:[
-
-    { id:'clt-slab', label:'CLT', children:[
-      { id:'clt-loads', label:'Load types', children:[
-        { id:'clt-load-udl',   label:'UDL',       status:'done',   link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1320910849/CLT+slab+calculator' },
-        { id:'clt-load-vdl',   label:'VDL',       status:'onhold' },
-        { id:'clt-load-point', label:'Point load', status:'onhold' },
-        { id:'clt-load-line',  label:'Line load',  status:'onhold' },
-      ]},
-      { id:'clt-uls', label:'ULS', children:[
-        { id:'clt-uls-bend',    label:'Bending (out of plane)',        status:'done',   link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1320910849/CLT+slab+calculator' },
-        { id:'clt-uls-shear',   label:'Shear (out of plane)',          status:'done',   link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1320910849/CLT+slab+calculator' },
-        { id:'clt-uls-com-perp',label:'Compression ⊥ grain (bearing)', status:'onhold', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1689616402/Specification+for+CLT+slab+design#SpecificationforCLTslabdesign-6.1.5:Compressionperpendiculartograin(bearing)' , info:'At the supports, bearing check.'},
-        { id:'clt-uls-comb-bt', label:'Combined bending/tension',      status:'onhold', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1689616402/Specification+for+CLT+slab+design#SpecificationforCLTslabdesign-6.2.3:Combinedbendingandaxialtension' },
-        { id:'clt-uls-comb-bc', label:'Combined bending/compression',  status:'onhold', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1689616402/Specification+for+CLT+slab+design#SpecificationforCLTslabdesign-6.2.4:Combinedbendingandcompression' },
-      ]},
-      { id:'clt-ulsfire', label:'ULS Fire', children:[
-        { id:'clt-ulsfire-bend',    label:'Bending (out of plane)',        status:'done',   link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1320910849/CLT+slab+calculator' },
-        { id:'clt-ulsfire-shear',   label:'Shear (out of plane)',          status:'done',   link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1320910849/CLT+slab+calculator' },
-        { id:'clt-ulsfire-comb-bt', label:'Combined bending/tension',      status:'onhold' },
-        { id:'clt-ulsfire-comb-bc', label:'Combined bending/compression',  status:'onhold' },
-      ]},
-      { id:'clt-sls', label:'SLS', children:[
-        { id:'clt-sls-inst',  label:'Deflection (winst)',    status:'done',   link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1320910849/CLT+slab+calculator' },
-        { id:'clt-sls-final', label:'Deflection (wnet,fin)', status:'done',   link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1320910849/CLT+slab+calculator' },
-        { id:'clt-sls-vib',   label:'Vibration',             status:'onhold', link:'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1689616402/Specification+for+CLT+slab+design#SpecificationforCLTslabdesign-Designprocess–SLS(vibration)' },
-      ]},
-    ]},
-
-    { id:'tcc-slab', label:'TCC', children:[
-      { id:'tcc-loads', label:'Load types', children:[
-        { id:'tcc-load-udl',   label:'UDL',       status:'done' },
-        { id:'tcc-load-vdl',   label:'VDL',       status:'onhold' },
-        { id:'tcc-load-point', label:'Point load', status:'onhold' },
-        { id:'tcc-load-line',  label:'Line load',  status:'onhold' },
-      ]},
-      { id:'tcc-uls', label:'ULS', children:[
-        { id:'tcc-uls-bend-inst',    label:'Bending instantaneous',              status:'done' },
-        { id:'tcc-uls-bend-50y',     label:'Bending in 50 years',                status:'done' },
-        { id:'tcc-uls-shear',        label:'Shear',                              status:'done' },
-        { id:'tcc-uls-clt-com-perp', label:'CLT – Compression ⊥ grain (bearing)', status:'onhold' },
-        { id:'tcc-uls-clt-bend',     label:'CLT – Bending (out of plane)',  status:'onhold' },
-        { id:'tcc-uls-clt-shear',    label:'CLT – Shear (out of plane)',    status:'onhold' },
-        { id:'tcc-uls-clt-comb-bt',  label:'CLT – Combined bending/tension',    status:'onhold' },
-        { id:'tcc-uls-clt-comb-bc',  label:'CLT – Combined bending/compression', status:'onhold' },
-        { id:'tcc-uls-conc-compr',   label:'Concrete – compressive strength', status:'onhold' },
-        { id:'tcc-uls-conc-tens',    label:'Concrete – tensile check',        status:'onhold' },
-        { id:'tcc-uls-conn-forces',  label:'Connector – ULS forces',          status:'onhold' },
-      ]},
-      { id:'tcc-ulsfire', label:'ULS Fire', children:[
-        { id:'tcc-ulsfire-bend-inst',    label:'Bending instantaneous',              status:'done' },
-        { id:'tcc-ulsfire-bend-50y',     label:'Bending in 50 years',                status:'done' },
-        { id:'tcc-ulsfire-shear',        label:'Shear',                              status:'done' },
-        { id:'tcc-ulsfire-clt-com-perp', label:'CLT – Compression ⊥ grain (bearing)', status:'onhold' },
-        { id:'tcc-ulsfire-clt-bend',     label:'CLT – Bending (out of plane)',  status:'onhold' },
-        { id:'tcc-ulsfire-clt-shear',    label:'CLT – Shear (out of plane)',    status:'onhold' },
-        { id:'tcc-ulsfire-clt-comb-bt',  label:'CLT – Combined bending/tension',    status:'onhold' },
-        { id:'tcc-ulsfire-clt-comb-bc',  label:'CLT – Combined bending/compression', status:'onhold' },
-        { id:'tcc-ulsfire-conc-compr',   label:'Concrete – compressive strength', status:'onhold' },
-        { id:'tcc-ulsfire-conc-tens',    label:'Concrete – tensile check',        status:'onhold' },
-        { id:'tcc-ulsfire-conn-forces',  label:'Connector – ULS forces',          status:'onhold' },
-      ]},
-      { id:'tcc-sls', label:'SLS', children:[
-        { id:'tcc-sls-inst',  label:'Deflection (winst)',    status:'done' },
-        { id:'tcc-sls-walls', label:'Deflection with walls', status:'done' },
-        { id:'tcc-sls-final', label:'Deflection (wnet,fin)', status:'done' },
-        { id:'tcc-sls-net',   label:'Net final deflection',  status:'done' },
-        { id:'tcc-sls-vib',   label:'Vibration',             status:'onhold' },
-      ]},
-    ]},
-
-  ]},
-];
-
-const collapsed = new Set(['glulam-beam','pfeifer-beam','glulam-col','clt-slab','tcc-slab']);
+let data = [];
+const collapsed = new Set();
 
 function leaves(n){ return n.children ? n.children.flatMap(leaves) : [n]; }
 
@@ -295,8 +179,9 @@ function buildNode(n, depth){
     <span class="label${isGroup?' group':''}">`;
 
   const labelHtml = isGroup ? n.label : (n.link ? `<a href="${n.link}" target="_blank">${n.label}</a>` : n.label);
+  const reqHtml = n.required ? `<span class="req-star" title="Required for proof engineer">★</span>` : '';
   const infoHtml = n.info ? `<span class="info-icon">i<span class="tip">${n.info}</span></span>` : '';
-  inner += labelHtml + infoHtml;
+  inner += reqHtml + labelHtml + infoHtml;
   inner += `</span>`;
 
   if(!isGroup){
@@ -305,6 +190,7 @@ function buildNode(n, depth){
     inner += `<div class="mini"><div class="mini-f" style="width:${pct}%"></div></div>
       <span class="count"><b>${done}</b>/${total}</span>`;
   }
+  if(!isGroup && n.eurocode) inner += `<span class="ec-tip">${n.eurocode}</span>`;
   inner += `</div>`;
 
   let children = '';
@@ -341,7 +227,12 @@ window.tog = function(id){
   render();
 };
 
-render();
+(function(){
+  const json = {"collapsed":["glulam-beam","pfeifer-beam","glulam-col","clt-slab","tcc-slab","clt-wall"],"data":[{"id":"beams","label":"Beams","children":[{"id":"glulam-beam","label":"Glulam beam","children":[{"id":"gb-loads","label":"Load types","children":[{"id":"gb-load-udl","label":"UDL","status":"done","required":true},{"id":"gb-load-vdl","label":"VDL","status":"onhold"},{"id":"gb-load-point","label":"Point load","status":"onhold"},{"id":"gb-load-torsion","label":"Direct torsion","status":"onhold"}]},{"id":"gb-uls","label":"ULS","children":[{"id":"gb-uls-bend","label":"Bending (pure)","status":"done","required":true,"eurocode":"EN 1995-1-1 §6.1.6 — Bending","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.1.6:Bending(noaxial)"},{"id":"gb-uls-shear","label":"Shear","status":"done","required":true,"eurocode":"EN 1995-1-1 §6.1.7 — Shear","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.1.7:Shear"},{"id":"gb-uls-com-perp","label":"Compression ⊥ grain (bearing)","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.1.5 — Compression perpendicular to the grain","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.1.5:Compressionperpendiculartograin(bearing)"},{"id":"gb-uls-comb-bc","label":"Combined bending/compression","status":"onhold","eurocode":"EN 1995-1-1 §6.2.4 — Combined bending and axial compression","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.2.4:Combinedbendingandcompression","info":"Only needed when the beam has moment + axial compression together."},{"id":"gb-uls-ltb","label":"Lateral torsional buckling","status":"onhold","eurocode":"EN 1995-1-1 §6.3.3 — Beams subjected to bending or combined bending and compression","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.3.3:Beamssubjectedbendingorcombinedbendingandcompression","info":"Required if the compression edge is not adequately laterally restrained. If full restraint is proven, this check may be omitted."},{"id":"gb-uls-torsion","label":"Torsion","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.1.8 — Torsion","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.1.8:Torsion"},{"id":"gb-add-notch","label":"Notch checks","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.5 — Notched members"},{"id":"gb-add-hole","label":"Hole checks","status":"onhold","required":true,"eurocode":"DIN EN 1995-1-1/NA NCI NA.6.7 — Beams with holes"},{"id":"gb-add-pen","label":"Penetration checks","status":"onhold","required":true,"eurocode":"DIN EN 1995-1-1/NA NCI NA.6.7 — Beams with penetrations"},{"id":"gb-add-support","label":"Support-detail checks","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.1.5 — Bearing at supports"},{"id":"gb-add-axial-stab","label":"Extra stability checks with axial force","status":"onhold","eurocode":"EN 1995-1-1 §6.3 — Stability of members"}]},{"id":"gb-ulsfire","label":"ULS Fire","children":[{"id":"gb-ulsfire-bend","label":"Bending (pure)","status":"done","eurocode":"EN 1995-1-2 §4.2 — Reduced cross-section method (bending per EN 1995-1-1 §6.1.6)","info":"Only needed when the member must satisfy a fire resistance requirement such as R30/R60/R90. Fire design is a separate accidental situation."},{"id":"gb-ulsfire-shear","label":"Shear","status":"done","eurocode":"EN 1995-1-2 §4.2 (shear per EN 1995-1-1 §6.1.7)"},{"id":"gb-ulsfire-comb-bc","label":"Combined bending/compression","status":"onhold","eurocode":"EN 1995-1-2 §4.2 (combined bending/compression per EN 1995-1-1 §6.2.4)","info":"Only needed in fire design and only if moment + axial compression act together."},{"id":"gb-ulsfire-ltb","label":"Lateral torsional buckling","status":"onhold","eurocode":"EN 1995-1-2 §4.2 (LTB per EN 1995-1-1 §6.3.3)"},{"id":"gb-ulsfire-torsion","label":"Torsion","status":"onhold","eurocode":"EN 1995-1-2 §4.2 (torsion per EN 1995-1-1 §6.1.8)"}]},{"id":"gb-sls","label":"SLS","children":[{"id":"gb-sls-inst","label":"Deflection (winst)","status":"done","required":true,"eurocode":"EN 1995-1-1 §7.2 — Limiting values for deflections","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-Designprocess–SLS(deflection)"},{"id":"gb-sls-final","label":"Deflection (wnet,fin)","status":"done","required":true,"eurocode":"EN 1995-1-1 §7.2 + §2.2.3 (creep, kdef)"}]}]},{"id":"pfeifer-beam","label":"Composite beam Pfeifer","children":[{"id":"pb-loads","label":"Load types","children":[{"id":"pb-load-udl","label":"UDL","status":"analysis","required":true,"link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1617068037/PFEIFER+Hybridbeam+preselection+calculator"},{"id":"pb-load-vdl","label":"VDL","status":"onhold"},{"id":"pb-load-point","label":"Point load","status":"onhold"}]},{"id":"pb-uls","label":"ULS","children":[{"id":"pb-uls-bend","label":"Bending","status":"analysis","required":true,"eurocode":"EN 1994-1-1 §6.2.1 + ETA Pfeifer Hybridbeam","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1617068037/PFEIFER+Hybridbeam+preselection+calculator#PFEIFERHybridbeampreselectioncalculator-ULSverification"},{"id":"pb-uls-shear","label":"Shear","status":"methodology","required":true,"eurocode":"EN 1994-1-1 §6.2.2 + ETA Pfeifer Hybridbeam","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1617068037/PFEIFER+Hybridbeam+preselection+calculator#PFEIFERHybridbeampreselectioncalculator-ULSverification"}]},{"id":"pb-ulsfire","label":"ULS Fire","children":[{"id":"pb-ulsfire-bend","label":"Bending","status":"methodology","eurocode":"EN 1994-1-2 §4.3 + ETA","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1617068037/PFEIFER+Hybridbeam+preselection+calculator"},{"id":"pb-ulsfire-shear","label":"Shear","status":"methodology","eurocode":"EN 1994-1-2 §4.3 + ETA","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1617068037/PFEIFER+Hybridbeam+preselection+calculator"}]},{"id":"pb-sls","label":"SLS","children":[{"id":"pb-sls-inst","label":"Deflection (winst)","status":"onhold","required":true,"eurocode":"EN 1994-1-1 §7.3 — Deflections","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1617068037/PFEIFER+Hybridbeam+preselection+calculator#PFEIFERHybridbeampreselectioncalculator-SLS-Deflectionsandvibrationserviceability"},{"id":"pb-sls-final","label":"Deflection (wnet,fin)","status":"onhold","required":true,"eurocode":"EN 1994-1-1 §7.3 + creep effects","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1617068037/PFEIFER+Hybridbeam+preselection+calculator#PFEIFERHybridbeampreselectioncalculator-SLS-Deflectionsandvibrationserviceability"}]}]}]},{"id":"columns","label":"Columns","children":[{"id":"glulam-col","label":"Glulam column","children":[{"id":"gc-loads","label":"Load types","children":[{"id":"gc-load-point","label":"Point load","status":"onhold","required":true},{"id":"gc-load-udl-wind","label":"UDL wind","status":"onhold"}]},{"id":"gc-uls","label":"ULS","children":[{"id":"gc-uls-com-par","label":"Compression ∥ grain","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.1.4 — Compression parallel to the grain","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.1.4:Compressionparalleltothegrain"},{"id":"gc-uls-com-perp","label":"Compression ⊥ grain (bearing)","status":"onhold","eurocode":"EN 1995-1-1 §6.1.5 — Compression perpendicular to the grain","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.1.5:Compressionperpendiculartograin(bearing)","info":"Usually not a standard column member check; this is more a local bearing/detail issue if applicable."},{"id":"gc-uls-comb-bc","label":"Combined bending/compression","status":"done","required":true,"eurocode":"EN 1995-1-1 §6.2.4 — Combined bending and axial compression","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.2.4:Combinedbendingandcompression"},{"id":"gc-uls-buck","label":"Buckling","status":"done","required":true,"eurocode":"EN 1995-1-1 §6.3.2 — Columns subjected to compression or combined compression and bending","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1684865033/Specification+for+beam+and+column+design#Specificationforbeamandcolumndesign-6.3.2:Columnssubjectedtoeithercompressionorcombinedcompressionandbending"},{"id":"gc-add-bearing","label":"Local bearing (base and head detail checks)","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.1.5 — Compression perpendicular to the grain (bearing)"},{"id":"gc-add-netsec","label":"Reduced net-section checks (drillings, slots, notches)","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §5.2 — Members (net cross-section verification)"},{"id":"gc-add-biaxial","label":"Biaxial interaction","status":"onhold","eurocode":"EN 1995-1-1 §6.2.4 + §6.3.2 — Biaxial bending with compression"}]},{"id":"gc-ulsfire","label":"ULS Fire","children":[{"id":"gc-ulsfire-com-par","label":"Compression ∥ grain","status":"onhold","required":true,"eurocode":"EN 1995-1-2 §4.2 (compression ∥ per EN 1995-1-1 §6.1.4)"},{"id":"gc-ulsfire-comb-bc","label":"Combined bending/compression","status":"done","required":true,"eurocode":"EN 1995-1-2 §4.2 (combined per EN 1995-1-1 §6.2.4)"},{"id":"gc-ulsfire-buck","label":"Buckling","status":"done","required":true,"eurocode":"EN 1995-1-2 §4.2 (buckling per EN 1995-1-1 §6.3.2)"}]}]}]},{"id":"slabs","label":"Slabs","children":[{"id":"clt-slab","label":"CLT","children":[{"id":"clt-loads","label":"Load types","children":[{"id":"clt-load-udl","label":"UDL","status":"done","required":true,"link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1320910849/CLT+slab+calculator"},{"id":"clt-load-vdl","label":"VDL","status":"onhold"},{"id":"clt-load-point","label":"Point load","status":"onhold"},{"id":"clt-load-line","label":"Line load","status":"onhold"}]},{"id":"clt-uls","label":"ULS","children":[{"id":"clt-uls-bend","label":"Bending (out of plane)","status":"done","required":true,"eurocode":"EN 1995-1-1 §6.1.6 — Bending (CLT γ-method or shear-analogy)","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1320910849/CLT+slab+calculator"},{"id":"clt-uls-shear","label":"Shear (out of plane)","status":"done","required":true,"eurocode":"EN 1995-1-1 §6.1.7 — Shear (incl. rolling shear for CLT)","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1320910849/CLT+slab+calculator"},{"id":"clt-uls-com-perp","label":"Compression ⊥ grain (bearing)","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.1.5 — Compression perpendicular to the grain","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1689616402/Specification+for+CLT+slab+design#SpecificationforCLTslabdesign-6.1.5:Compressionperpendiculartograin(bearing)","info":"At the supports, bearing check."},{"id":"clt-uls-comb-bt","label":"Combined bending/tension","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.2.3 — Combined bending and axial tension","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1689616402/Specification+for+CLT+slab+design#SpecificationforCLTslabdesign-6.2.3:Combinedbendingandaxialtension"},{"id":"clt-uls-comb-bc","label":"Combined bending/compression","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.2.4 — Combined bending and axial compression","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1689616402/Specification+for+CLT+slab+design#SpecificationforCLTslabdesign-6.2.4:Combinedbendingandcompression"},{"id":"clt-add-notch","label":"Notch checks","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.5 — Notched members"},{"id":"clt-add-support","label":"Support-detail checks","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.1.5 — Bearing at supports"},{"id":"clt-add-openings","label":"Openings in CLT slabs","status":"onhold","required":true,"eurocode":"EAD 130005-00-0304 / ETA — CLT openings (no direct EN 1995 clause)"}]},{"id":"clt-ulsfire","label":"ULS Fire","children":[{"id":"clt-ulsfire-bend","label":"Bending (out of plane)","status":"done","required":true,"eurocode":"EN 1995-1-2 §4.2 (bending per EN 1995-1-1 §6.1.6)","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1320910849/CLT+slab+calculator"},{"id":"clt-ulsfire-shear","label":"Shear (out of plane)","status":"done","required":true,"eurocode":"EN 1995-1-2 §4.2 (shear per EN 1995-1-1 §6.1.7)","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1320910849/CLT+slab+calculator"},{"id":"clt-ulsfire-comb-bt","label":"Combined bending/tension","status":"onhold","required":true,"eurocode":"EN 1995-1-2 §4.2 (combined per EN 1995-1-1 §6.2.3)"},{"id":"clt-ulsfire-comb-bc","label":"Combined bending/compression","status":"onhold","required":true,"eurocode":"EN 1995-1-2 §4.2 (combined per EN 1995-1-1 §6.2.4)"}]},{"id":"clt-sls","label":"SLS","children":[{"id":"clt-sls-inst","label":"Deflection (winst)","status":"done","required":true,"eurocode":"EN 1995-1-1 §7.2 — Limiting values for deflections","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1320910849/CLT+slab+calculator"},{"id":"clt-sls-final","label":"Deflection (wnet,fin)","status":"done","required":true,"eurocode":"EN 1995-1-1 §7.2 + §2.2.3 (creep, kdef)","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1320910849/CLT+slab+calculator"},{"id":"clt-sls-vib","label":"Vibration","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §7.3 — Vibrations","link":"https://all3.atlassian.net/wiki/spaces/RTAP/pages/1689616402/Specification+for+CLT+slab+design#SpecificationforCLTslabdesign-Designprocess–SLS(vibration)"}]}]},{"id":"tcc-slab","label":"TCC","children":[{"id":"tcc-loads","label":"Load types","children":[{"id":"tcc-load-udl","label":"UDL","status":"done","required":true},{"id":"tcc-load-vdl","label":"VDL","status":"onhold"},{"id":"tcc-load-point","label":"Point load","status":"onhold"},{"id":"tcc-load-line","label":"Line load","status":"onhold"}]},{"id":"tcc-uls","label":"ULS","children":[{"id":"tcc-uls-bend-inst","label":"Bending instantaneous","status":"done","required":true,"eurocode":"EN 1995-1-1 Annex B (γ-method) + EN 1992-1-1 §6.1"},{"id":"tcc-uls-bend-50y","label":"Bending in 50 years","status":"done","required":true,"eurocode":"EN 1995-1-1 Annex B + §2.2.3 (kdef) + EN 1992-1-1 §3.1.4 (creep)"},{"id":"tcc-uls-shear","label":"Shear","status":"done","required":true,"eurocode":"EN 1995-1-1 §6.1.7 + EN 1992-1-1 §6.2"},{"id":"tcc-uls-clt-com-perp","label":"CLT – Compression ⊥ grain (bearing)","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.1.5"},{"id":"tcc-uls-clt-bend","label":"CLT – Bending (out of plane)","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.1.6"},{"id":"tcc-uls-clt-shear","label":"CLT – Shear (out of plane)","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.1.7"},{"id":"tcc-uls-clt-comb-bt","label":"CLT – Combined bending/tension","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.2.3"},{"id":"tcc-uls-clt-comb-bc","label":"CLT – Combined bending/compression","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.2.4"},{"id":"tcc-uls-conc-compr","label":"Concrete – compressive strength","status":"onhold","required":true,"eurocode":"EN 1992-1-1 §3.1.6 / §6.1 — Compressive design strength"},{"id":"tcc-uls-conc-tens","label":"Concrete – tensile check","status":"onhold","required":true,"eurocode":"EN 1992-1-1 §6.2.2 — Members not requiring shear reinforcement"},{"id":"tcc-uls-conn-forces","label":"Connector – ULS forces","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §8 + Annex B + ETA (connector forces)"}]},{"id":"tcc-ulsfire","label":"ULS Fire","children":[{"id":"tcc-ulsfire-bend-inst","label":"Bending instantaneous","status":"done","required":true,"eurocode":"EN 1995-1-2 + EN 1992-1-2 + EN 1995-1-1 Annex B"},{"id":"tcc-ulsfire-bend-50y","label":"Bending in 50 years","status":"done","required":true,"eurocode":"EN 1995-1-2 + EN 1992-1-2 + Annex B + creep"},{"id":"tcc-ulsfire-shear","label":"Shear","status":"done","required":true,"eurocode":"EN 1995-1-2 + EN 1992-1-2"},{"id":"tcc-ulsfire-clt-com-perp","label":"CLT – Compression ⊥ grain (bearing)","status":"onhold","required":true,"eurocode":"EN 1995-1-2 (per EN 1995-1-1 §6.1.5)"},{"id":"tcc-ulsfire-clt-bend","label":"CLT – Bending (out of plane)","status":"onhold","required":true,"eurocode":"EN 1995-1-2 (per EN 1995-1-1 §6.1.6)"},{"id":"tcc-ulsfire-clt-shear","label":"CLT – Shear (out of plane)","status":"onhold","required":true,"eurocode":"EN 1995-1-2 (per EN 1995-1-1 §6.1.7)"},{"id":"tcc-ulsfire-clt-comb-bt","label":"CLT – Combined bending/tension","status":"onhold","required":true,"eurocode":"EN 1995-1-2 (per EN 1995-1-1 §6.2.3)"},{"id":"tcc-ulsfire-clt-comb-bc","label":"CLT – Combined bending/compression","status":"onhold","required":true,"eurocode":"EN 1995-1-2 (per EN 1995-1-1 §6.2.4)"},{"id":"tcc-ulsfire-conc-compr","label":"Concrete – compressive strength","status":"onhold","required":true,"eurocode":"EN 1992-1-2 §4.2 — Concrete compressive in fire"},{"id":"tcc-ulsfire-conc-tens","label":"Concrete – tensile check","status":"onhold","required":true,"eurocode":"EN 1992-1-2 §4.2 — Concrete tensile in fire"},{"id":"tcc-ulsfire-conn-forces","label":"Connector – ULS forces","status":"onhold","required":true,"eurocode":"EN 1995-1-2 + ETA (connector in fire)"}]},{"id":"tcc-sls","label":"SLS","children":[{"id":"tcc-sls-inst","label":"Deflection (winst)","status":"done","required":true,"eurocode":"EN 1995-1-1 §7.2 + Annex B + EN 1992-1-1 §7.4"},{"id":"tcc-sls-walls","label":"Deflection with walls","status":"done","required":true,"eurocode":"EN 1995-1-1 §7.2 + Annex B (deflection accounting for walls)"},{"id":"tcc-sls-final","label":"Deflection (wnet,fin)","status":"done","required":true,"eurocode":"EN 1995-1-1 §7.2 + §2.2.3 (kdef) + EN 1992-1-1 §3.1.4 (creep)"},{"id":"tcc-sls-net","label":"Net final deflection","status":"done","required":true,"eurocode":"EN 1995-1-1 §7.2 (wnet,fin including creep + camber)"},{"id":"tcc-sls-vib","label":"Vibration","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §7.3 — Vibrations"}]}]}]},{"id":"walls","label":"Walls","children":[{"id":"clt-wall","label":"CLT wall","children":[{"id":"cw-loads","label":"Load types","children":[{"id":"cw-load-udl","label":"UDL","status":"onhold","required":true},{"id":"cw-load-line","label":"Line load","status":"onhold"},{"id":"cw-load-point","label":"Point load","status":"onhold"},{"id":"cw-load-udl-wind","label":"UDL wind","status":"onhold"}]},{"id":"cw-uls","label":"ULS","children":[{"id":"cw-uls-bend","label":"Bending (pure)","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.1.6 — Bending"},{"id":"cw-uls-shear","label":"Shear","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.1.7 — Shear (CLT panel)"},{"id":"cw-uls-tens-par","label":"Tension ∥ grain","status":"onhold","eurocode":"EN 1995-1-1 §6.1.2 — Tension parallel to the grain","info":"Not a standard global wall check for a typical gravity wall; relevant when uplift / overturning creates axial tension at the wall edge."},{"id":"cw-uls-tens-perp","label":"Tension ⊥ grain","status":"onhold","eurocode":"EN 1995-1-1 §6.1.3 — Tension perpendicular to the grain","info":"Usually not a standard global wall-member check; for CLT it is more a local / panel-specific issue, often tied to cross layers, rolling shear, openings, or local details."},{"id":"cw-uls-com-par","label":"Compression ∥ grain","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.1.4 — Compression parallel to the grain"},{"id":"cw-uls-com-perp","label":"Compression ⊥ grain","status":"onhold","eurocode":"EN 1995-1-1 §6.1.5 — Compression perpendicular to the grain","info":"Usually not a global wall-panel check; mainly a local bearing/contact check at supports or concentrated contact zones."},{"id":"cw-uls-comb-bt","label":"Combined bending/tension","status":"onhold","eurocode":"EN 1995-1-1 §6.2.3 — Combined bending and axial tension","info":"Only required when the wall has moment + axial tension together (e.g. overturning/uplift effects)."},{"id":"cw-uls-comb-bc","label":"Combined bending/compression","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.2.4 — Combined bending and axial compression","info":"Often required in practice: load-bearing CLT walls commonly carry vertical compression plus bending from wind / frame action / eccentricity."},{"id":"cw-uls-ltb","label":"Lateral torsional buckling","status":"onhold","eurocode":"EN 1995-1-1 §6.3.3 — Lateral torsional stability"},{"id":"cw-uls-torsion","label":"Torsion","status":"onhold","eurocode":"EN 1995-1-1 §6.1.8 — Torsion"},{"id":"cw-add-rocking","label":"Rocking of the wall assembly","status":"onhold","required":true,"eurocode":"EN 1990 §6.4 (EQU) + EN 1991-1-4 (wind) + EN 1995-1-1 §9 (assemblies)"},{"id":"cw-add-sliding","label":"Sliding of the wall assembly","status":"onhold","required":true,"eurocode":"EN 1990 §6.4 (EQU) + EN 1991-1-4 + EN 1995-1-1 §9"},{"id":"cw-add-overturning","label":"Overturning of the wall assembly","status":"onhold","required":true,"eurocode":"EN 1990 §6.4 (EQU) + EN 1991-1-4 + EN 1995-1-1 §9"},{"id":"cw-add-rolling","label":"Rolling shear in cross layers","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.1.7 — Rolling shear (fr,k for CLT cross layers)"},{"id":"cw-add-openings","label":"Reduced section at openings","status":"onhold","required":true,"eurocode":"EAD 130005-00-0304 / ETA — Reduced section at CLT openings"},{"id":"cw-add-force-transfer","label":"Local force transfer around openings","status":"onhold","required":true,"eurocode":"EAD 130005-00-0304 / ETA — Local force transfer around openings"},{"id":"cw-add-bearing","label":"Local bearing / load introduction","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §6.1.5 — Local bearing / load introduction"}]},{"id":"cw-ulsfire","label":"ULS Fire","children":[{"id":"cw-ulsfire-bend","label":"Bending (pure)","status":"onhold","required":true,"eurocode":"EN 1995-1-2 §4.2 (bending per EN 1995-1-1 §6.1.6)"},{"id":"cw-ulsfire-shear","label":"Shear","status":"onhold","required":true,"eurocode":"EN 1995-1-2 §4.2 (shear per EN 1995-1-1 §6.1.7)"},{"id":"cw-ulsfire-tens-par","label":"Tension ∥ grain","status":"onhold","required":true,"eurocode":"EN 1995-1-2 §4.2 (tension ∥ per EN 1995-1-1 §6.1.2)"},{"id":"cw-ulsfire-tens-perp","label":"Tension ⊥ grain","status":"onhold","eurocode":"EN 1995-1-2 §4.2 (tension ⊥ per EN 1995-1-1 §6.1.3)","info":"Only needed in fire design if such a local tension-perpendicular effect is relevant."},{"id":"cw-ulsfire-com-par","label":"Compression ∥ grain","status":"onhold","required":true,"eurocode":"EN 1995-1-2 §4.2 (compression ∥ per EN 1995-1-1 §6.1.4)"},{"id":"cw-ulsfire-com-perp","label":"Compression ⊥ grain","status":"onhold","eurocode":"EN 1995-1-2 §4.2 (compression ⊥ per EN 1995-1-1 §6.1.5)","info":"Only needed in fire design if such a local bearing situation is being checked."},{"id":"cw-ulsfire-comb-bt","label":"Combined bending/tension","status":"onhold","eurocode":"EN 1995-1-2 §4.2 (combined per EN 1995-1-1 §6.2.3)","info":"Only needed in fire design if combined tension+bending exists."},{"id":"cw-ulsfire-comb-bc","label":"Combined bending/compression","status":"onhold","required":true,"eurocode":"EN 1995-1-2 §4.2 (combined per EN 1995-1-1 §6.2.4)"},{"id":"cw-ulsfire-ltb","label":"Lateral torsional buckling","status":"onhold","eurocode":"EN 1995-1-2 §4.2 (LTB per EN 1995-1-1 §6.3.3)"},{"id":"cw-ulsfire-torsion","label":"Torsion","status":"onhold","eurocode":"EN 1995-1-2 §4.2 (torsion per EN 1995-1-1 §6.1.8)"}]},{"id":"cw-sls","label":"SLS","children":[{"id":"cw-sls-inst","label":"Deflection (winst)","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §7.2 — Limiting values for deflections"},{"id":"cw-sls-final","label":"Deflection (wnet,fin)","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §7.2 + §2.2.3 (creep, kdef)"},{"id":"cw-sls-vib","label":"Vibration","status":"onhold","eurocode":"EN 1995-1-1 §7.3 — Vibrations"},{"id":"cw-add-drift","label":"Interstorey drift","status":"onhold","required":true,"eurocode":"EN 1990 Annex A1 §A1.4.3 — Horizontal displacements (interstorey)"},{"id":"cw-add-totaldef","label":"Total lateral deformation","status":"onhold","required":true,"eurocode":"EN 1990 Annex A1 §A1.4.3 — Horizontal displacements (total)"},{"id":"cw-add-shear-def","label":"Shear-deformation contribution in cross layers","status":"onhold","required":true,"eurocode":"EN 1995-1-1 §2.2.2 + §7.2 — Shear-deformation contribution"}]}]}]}]};
+  data = json.data;
+  json.collapsed.forEach(id => collapsed.add(id));
+  render();
+})();
 </script>
 </body>
 </html>
