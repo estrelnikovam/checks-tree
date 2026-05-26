@@ -9,17 +9,21 @@
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fff; color: #1a1a1a; padding: 1.5rem; }
 .wrap { max-width: 920px; }
 
+.tabs { display: flex; gap: 4px; margin-bottom: 1.25rem; }
+.tab { padding: 6px 18px; border-radius: 6px; border: 1px solid #e0e0da; background: #fff; font-size: 13px; cursor: pointer; color: #888; font-family: inherit; transition: background .15s; }
+.tab.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+.tab:hover:not(.active) { background: #f5f5f3; }
+
 .topbar { display: flex; gap: 12px; margin-bottom: 1rem; flex-wrap: wrap; }
 .vblock { background: #f5f5f3; border-radius: 8px; padding: 10px 16px; font-size: 13px; flex: 1; min-width: 200px; }
 .vblock-title { font-weight: 500; font-size: 12px; color: #888; margin-bottom: 6px; }
 .vblock-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
 .vblock-bar { flex: 1; height: 6px; border-radius: 3px; background: #e0e0da; overflow: hidden; }
-.vblock-fill-green { height: 100%; border-radius: 3px; background: #1D9E75; transition: width .4s; }
-.vblock-fill-red   { height: 100%; border-radius: 3px; background: #E24B4A; transition: width .4s; }
+.vblock-fill-green { height: 100%; border-radius: 3px; background: #1D9E75; transition: width .4s; display: inline-block; float: left; }
+.vblock-fill-red   { height: 100%; border-radius: 3px; background: #E24B4A; transition: width .4s; display: inline-block; float: left; }
 .vblock-num { font-size: 12px; color: #888; white-space: nowrap; }
 .vblock-num b { color: #1a1a1a; font-weight: 500; }
 .vblock-sub { font-size: 11px; color: #aaa; margin-top: 2px; }
-.vblock-sub.warn { color: #c0392b; font-weight: 500; }
 
 .legend { display: flex; gap: 8px; font-size: 12px; color: #888; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; }
 .badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; white-space: nowrap; flex-shrink: 0; }
@@ -62,55 +66,43 @@ li.tnode { padding: 0; }
 .no-checks-icon { font-size: 14px; flex-shrink: 0; }
 .no-checks-text { font-size: 12px; color: #b02020; flex: 1; line-height: 1.4; }
 .no-checks-tag  { font-size: 10px; background: #FCEBEB; color: #A32D2D; border-radius: 8px; padding: 1px 7px; white-space: nowrap; font-weight: 600; }
-
-.info-icon {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 14px; height: 14px; border-radius: 50%;
-  background: #d0e8f5; color: #4a90d9;
-  font-size: 9px; font-style: italic; font-weight: 700;
-  cursor: help; position: relative; flex-shrink: 0; margin-left: 4px;
-}
-.info-icon .tip {
-  visibility: hidden; opacity: 0;
-  width: 260px; background: #333; color: #fff;
-  font-size: 11px; font-style: normal; font-weight: 400;
-  border-radius: 6px; padding: 7px 10px; line-height: 1.45;
-  position: absolute; z-index: 100; bottom: 130%; left: 50%;
-  transform: translateX(-50%); transition: opacity .15s;
-  pointer-events: none;
-}
-.info-icon:hover .tip { visibility: visible; opacity: 1; }
 </style>
 </head>
 <body>
 <div class="wrap">
+
+  <div class="tabs">
+    <button class="tab active" id="tab-checks" onclick="setMode('checks')">Checks</button>
+    <button class="tab"        id="tab-docs"   onclick="setMode('docs')">Docs</button>
+  </div>
+
   <div class="topbar">
     <div class="vblock">
-      <div class="vblock-title">Overall progress</div>
+      <div class="vblock-title" id="bar-title">Overall progress</div>
       <div class="vblock-row">
         <div class="vblock-bar">
-          <div class="vblock-fill-green" id="bar-done" style="width:0; display:inline-block; float:left"></div>
-          <div class="vblock-fill-red"   id="bar-blocked" style="width:0; display:inline-block; float:left"></div>
+          <div class="vblock-fill-green" id="bar-done"    style="width:0"></div>
+          <div class="vblock-fill-red"   id="bar-blocked" style="width:0"></div>
         </div>
-        <span class="vblock-num"><b id="done-checks">0</b>/<span id="total-checks">0</span> done</span>
+        <span class="vblock-num"><b id="stat-done">0</b>/<span id="stat-total">0</span> done</span>
       </div>
-      <div class="vblock-sub" id="sub-checks"></div>
+      <div class="vblock-sub" id="stat-sub"></div>
     </div>
   </div>
 
   <div class="legend">
     <span class="badge b-todo">To do</span>
-    <span class="legend-arrow" style="color:#ccc;font-size:11px">→</span>
+    <span style="color:#ccc;font-size:11px">→</span>
     <span class="badge b-wip">Methodology <span style="opacity:.6;font-size:10px">[TECH]</span></span>
-    <span class="legend-arrow" style="color:#ccc;font-size:11px">→</span>
+    <span style="color:#ccc;font-size:11px">→</span>
     <span class="badge b-wip">Dev <span style="opacity:.6;font-size:10px">[RTA]</span></span>
-    <span class="legend-arrow" style="color:#ccc;font-size:11px">→</span>
+    <span style="color:#ccc;font-size:11px">→</span>
     <span class="badge b-wip">QA <span style="opacity:.6;font-size:10px">[TECH]</span></span>
-    <span class="legend-arrow" style="color:#ccc;font-size:11px">→</span>
+    <span style="color:#ccc;font-size:11px">→</span>
     <span class="badge b-wip">Export to report <span style="opacity:.6;font-size:10px">[RTA]</span></span>
-    <span class="legend-arrow" style="color:#ccc;font-size:11px">→</span>
+    <span style="color:#ccc;font-size:11px">→</span>
     <span class="badge b-wip">Review <span style="opacity:.6;font-size:10px">[TECH]</span></span>
-    <span class="legend-arrow" style="color:#ccc;font-size:11px">→</span>
+    <span style="color:#ccc;font-size:11px">→</span>
     <span class="badge b-done">Done</span>
     <span class="badge b-onhold" style="margin-left:8px">On Hold</span>
     <span class="badge b-nochecks" style="margin-left:8px">⚠ No methodology</span>
@@ -132,190 +124,172 @@ const STATUSES = [
 function sCls(key)  { return (STATUSES.find(x => x.key === key) || { cls: 'todo' }).cls; }
 function sLabel(key){ return (STATUSES.find(x => x.key === key) || { label: key }).label; }
 
+// ─── DATA ────────────────────────────────────────────────────────────────────
+
+const SECTION_LABELS = [
+  { id: 'resources',   label: 'Resources' },
+  { id: 'description', label: 'Description' },
+  { id: 'principles',  label: 'Principles of operation' },
+  { id: 'resistance',  label: 'Resistance derivation' },
+  { id: 'inputs',      label: 'Selection algorithm — Input parameters' },
+  { id: 'derived',     label: 'Selection algorithm — Derived parameters' },
+  { id: 'filter',      label: 'Selection algorithm — Filter steps' },
+  { id: 'sorting',     label: 'Selection algorithm — Sorting steps' },
+  { id: 'limitations', label: 'Selection algorithm — Limitations' },
+  { id: 'rfem',        label: 'RFEM Modelling' },
+];
+
+function makeSections(statuses) {
+  // statuses: object {sectionId: 'done'|'todo'|...} or null for no page
+  if (!statuses) return [];
+  return SECTION_LABELS.map(s => ({
+    id: s.id, label: s.label, status: statuses[s.id] || 'todo'
+  }));
+}
+
 const connectors = [
   {
     id: 'col-col',
     type: 'GL Column – GL Column',
     manufacturer: 'ALL3',
-
     priority: 1,
     link: 'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1253310468',
     checks: [
-      { id: 'cc-screw-y', label: 'Screw resistance in y' },
-      { id: 'cc-screw-z', label: 'Screw resistance in z' },
-      { id: 'cc-plate',   label: 'Shear resistance — knife plate' },
-      { id: 'cc-dowel',   label: 'Dowel resistance' },
-      { id: 'cc-glulam',  label: 'Glulam splitting resistance' },
-    ]
+      { id: 'cc-screw-y', label: 'Screw resistance in y',         status: 'done' },
+      { id: 'cc-screw-z', label: 'Screw resistance in z',         status: 'done' },
+      { id: 'cc-plate',   label: 'Shear resistance — knife plate',status: 'done' },
+      { id: 'cc-dowel',   label: 'Dowel resistance',              status: 'done' },
+      { id: 'cc-glulam',  label: 'Glulam splitting resistance',   status: 'done' },
+    ],
+    sections: makeSections({
+      resources: 'done', description: 'done', principles: 'done',
+      resistance: 'done', inputs: 'done', derived: 'done',
+      filter: 'done', sorting: 'done', limitations: 'done', rfem: 'done',
+    }),
   },
   {
     id: 'col-found-all3',
     type: 'GL Column – Foundation',
     manufacturer: 'ALL3',
-
     priority: 2,
     link: 'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1322090503',
     checks: [
-      { id: 'cf-screw-y',  label: 'Screw resistance in y' },
-      { id: 'cf-screw-z',  label: 'Screw resistance in z' },
-      { id: 'cf-anchor-y', label: 'Anchor shear resistance in y' },
-      { id: 'cf-anchor-z', label: 'Anchor shear resistance in z' },
-      { id: 'cf-concrete', label: 'Concrete compression resistance' },
-    ]
+      { id: 'cf-screw-y',  label: 'Screw resistance in y',          status: 'done' },
+      { id: 'cf-screw-z',  label: 'Screw resistance in z',          status: 'done' },
+      { id: 'cf-anchor-y', label: 'Anchor shear resistance in y',   status: 'done' },
+      { id: 'cf-anchor-z', label: 'Anchor shear resistance in z',   status: 'done' },
+      { id: 'cf-concrete', label: 'Concrete compression resistance', status: 'done' },
+    ],
+    sections: makeSections({
+      resources: 'done', description: 'done', principles: 'done',
+      resistance: 'done', inputs: 'done', derived: 'done',
+      filter: 'done', sorting: 'done', limitations: 'done', rfem: 'done',
+    }),
   },
   {
     id: 'beam-col-pitzl',
     type: 'GL Beam – GL Column',
     manufacturer: 'Pitzl HVP',
-
     priority: 3,
     link: 'https://all3.atlassian.net/wiki/spaces/RTAP/pages/901349382',
     checks: [
-      { id: 'bc-screw', label: 'Screw resistance — F2,screw' },
-      { id: 'bc-alu',   label: 'Aluminium connector resistance — F2,ALU' },
-    ]
+      { id: 'bc-screw', label: 'Screw resistance — F2,screw',             status: 'done' },
+      { id: 'bc-alu',   label: 'Aluminium connector resistance — F2,ALU', status: 'done' },
+    ],
+    sections: makeSections({
+      resources: 'done', description: 'done', principles: 'done',
+      resistance: 'done', inputs: 'done', derived: 'done',
+      filter: 'done', sorting: 'done', limitations: 'done', rfem: 'done',
+    }),
   },
-  {
-    id: 'pfeifer-col',
-    type: 'Pfeifer Beam – GL Column',
-    manufacturer: 'Pfeifer',
-
-    priority: 4,
-    checks: []
-  },
-  {
-    id: 'pfeifer-core',
-    type: 'Pfeifer Beam – Core',
-    manufacturer: 'Pfeifer',
-
-    priority: 5,
-    checks: []
-  },
-  {
-    id: 'col-pfeifer',
-    type: 'GL Column – Pfeifer Beam',
-    manufacturer: 'Pfeifer',
-
-    priority: 6,
-    checks: []
-  },
-  {
-    id: 'clt-pfeifer',
-    type: 'CLT Slab – Pfeifer Beam',
-    manufacturer: 'Pfeifer',
-    priority: 7,
-    checks: []
-  },
-  {
-    id: 'clt-wall',
-    type: 'CLT Slab – Wall',
-    manufacturer: 'ALL3',
-
-    priority: 8,
-    checks: []
-  },
-  {
-    id: 'clt-core',
-    type: 'CLT Slab – Core',
-    manufacturer: 'ALL3',
-
-    priority: 9,
-    checks: []
-  },
-  {
-    id: 'tcc-core',
-    type: 'TCC Slab – Core',
-    manufacturer: 'ALL3',
-
-    priority: 10,
-    checks: []
-  },
-  {
-    id: 'beam-core-alumega',
-    type: 'GL Beam – Core',
-    manufacturer: 'Alumega',
-
-    priority: 11,
-    checks: []
-  },
-  {
-    id: 'beam-core-all3',
-    type: 'GL Beam – Core',
-    manufacturer: 'ALL3',
-
-    priority: 12,
-    checks: []
-  },
-  {
-    id: 'col-found-peikko',
-    type: 'GL Column – Foundation',
-    manufacturer: 'Peikko Rooco Shoe',
-
-    priority: 13,
-    checks: []
-  },
-  {
-    id: 'col-delta-col',
-    type: 'GL Column – (Delta Beam) – GL Column',
-    manufacturer: 'Peikko Rooco Shoe',
-
-    priority: 14,
-    checks: []
-  },
-  {
-    id: 'col-delta',
-    type: 'GL Column – Delta Beam',
-    manufacturer: 'Peikko Rooco Shoe',
-
-    priority: 15,
-    checks: []
-  },
+  { id: 'pfeifer-col',     type: 'Pfeifer Beam – GL Column',              manufacturer: 'Pfeifer',          priority: 4,  checks: [], sections: [] },
+  { id: 'pfeifer-core',    type: 'Pfeifer Beam – Core',                   manufacturer: 'Pfeifer',          priority: 5,  checks: [], sections: [] },
+  { id: 'col-pfeifer',     type: 'GL Column – Pfeifer Beam',              manufacturer: 'Pfeifer',          priority: 6,  checks: [], sections: [] },
+  { id: 'clt-pfeifer',     type: 'CLT Slab – Pfeifer Beam',               manufacturer: 'Pfeifer',          priority: 7,  checks: [], sections: [] },
+  { id: 'clt-wall',        type: 'CLT Slab – Wall',                       manufacturer: 'ALL3',             priority: 8,  checks: [], sections: [] },
+  { id: 'clt-core',        type: 'CLT Slab – Core',                       manufacturer: 'ALL3',             priority: 9,  checks: [], sections: [] },
+  { id: 'tcc-core',        type: 'TCC Slab – Core',                       manufacturer: 'ALL3',             priority: 10, checks: [], sections: [] },
+  { id: 'beam-core-alumega',type: 'GL Beam – Core',                       manufacturer: 'Alumega',          priority: 11, checks: [], sections: [] },
+  { id: 'beam-core-all3',  type: 'GL Beam – Core',                        manufacturer: 'ALL3',             priority: 12, checks: [], sections: [] },
+  { id: 'col-found-peikko',type: 'GL Column – Foundation',                manufacturer: 'Peikko Rooco Shoe',priority: 13, checks: [], sections: [] },
+  { id: 'col-delta-col',   type: 'GL Column – (Delta Beam) – GL Column',  manufacturer: 'Peikko Rooco Shoe',priority: 14, checks: [], sections: [] },
+  { id: 'col-delta',       type: 'GL Column – Delta Beam',                manufacturer: 'Peikko Rooco Shoe',priority: 15, checks: [], sections: [] },
 ];
 
-// All checks are done for connectors that have checks defined
-connectors.forEach(c => c.checks.forEach(ch => ch.status = ch.status || 'done'));
+// ─── MODE ────────────────────────────────────────────────────────────────────
 
-function computeStats() {
-  const total   = connectors.length;
-  const done    = connectors.filter(c => c.checks.length > 0 && c.checks.every(x => x.status === 'done')).length;
-  const blocked = connectors.filter(c => c.checks.length === 0).length;
+let currentMode = 'checks';
 
-  const donePct    = Math.round(done    / total * 100);
-  const blockedPct = Math.round(blocked / total * 100);
-
-  document.getElementById('bar-done').style.width    = donePct + '%';
-  document.getElementById('bar-blocked').style.width = blockedPct + '%';
-  document.getElementById('done-checks').textContent  = done;
-  document.getElementById('total-checks').textContent = total;
-  document.getElementById('sub-checks').textContent   =
-    done + ' connector' + (done !== 1 ? 's' : '') + ' done · ' +
-    blocked + ' without methodology · ' +
-    (total - done - blocked) + ' in progress';
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('tab-checks').classList.toggle('active', mode === 'checks');
+  document.getElementById('tab-docs').classList.toggle('active', mode === 'docs');
+  rebuild();
 }
 
-function renderCheck(check) {
-  const cls = sCls(check.status);
-  const lbl = sLabel(check.status);
+// ─── STATS ───────────────────────────────────────────────────────────────────
+
+function computeStats() {
+  const total = connectors.length;
+
+  if (currentMode === 'checks') {
+    const done    = connectors.filter(c => c.checks.length > 0 && c.checks.every(x => x.status === 'done')).length;
+    const blocked = connectors.filter(c => c.checks.length === 0).length;
+    const donePct    = Math.round(done    / total * 100);
+    const blockedPct = Math.round(blocked / total * 100);
+    document.getElementById('bar-title').textContent   = 'Overall progress — Checks';
+    document.getElementById('bar-done').style.width    = donePct + '%';
+    document.getElementById('bar-blocked').style.width = blockedPct + '%';
+    document.getElementById('stat-done').textContent   = done;
+    document.getElementById('stat-total').textContent  = total;
+    document.getElementById('stat-sub').textContent    =
+      done + ' connector' + (done !== 1 ? 's' : '') + ' done · ' +
+      blocked + ' without methodology · ' +
+      (total - done - blocked) + ' in progress';
+
+  } else {
+    const totalSections = connectors.reduce((s, c) => s + c.sections.length, 0);
+    const doneSections  = connectors.reduce((s, c) => s + c.sections.filter(x => x.status === 'done').length, 0);
+    const noPage        = connectors.filter(c => c.sections.length === 0).length;
+    const maxSections   = total * SECTION_LABELS.length;
+    const donePct    = Math.round(doneSections / maxSections * 100);
+    const blockedPct = Math.round(noPage       / total       * 100);
+    document.getElementById('bar-title').textContent   = 'Overall progress — Docs';
+    document.getElementById('bar-done').style.width    = donePct + '%';
+    document.getElementById('bar-blocked').style.width = blockedPct + '%';
+    document.getElementById('stat-done').textContent   = doneSections;
+    document.getElementById('stat-total').textContent  = maxSections;
+    document.getElementById('stat-sub').textContent    =
+      doneSections + '/' + maxSections + ' sections filled · ' +
+      noPage + ' connectors without a page';
+  }
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+
+function renderItem(item) {
+  const cls = sCls(item.status);
+  const lbl = sLabel(item.status);
   const li = document.createElement('li');
   li.className = 'tnode';
   li.innerHTML =
     '<div class="row">' +
       '<div class="spacer"></div>' +
       '<div class="stripe s-' + cls + '"></div>' +
-      '<span class="label">' + check.label + '</span>' +
+      '<span class="label">' + item.label + '</span>' +
       '<span class="badge b-' + cls + '">' + lbl + '</span>' +
     '</div>';
   return li;
 }
 
-function renderNoChecks() {
+function renderWarning(text) {
   const li = document.createElement('li');
   li.className = 'tnode';
   li.innerHTML =
     '<div class="no-checks-wrap">' +
       '<div class="no-checks-row">' +
         '<span class="no-checks-icon">⚠️</span>' +
-        '<span class="no-checks-text">Filter steps not defined — no methodology provided yet</span>' +
+        '<span class="no-checks-text">' + text + '</span>' +
         '<span class="no-checks-tag">[TECH] needed</span>' +
       '</div>' +
     '</div>';
@@ -323,17 +297,18 @@ function renderNoChecks() {
 }
 
 function renderConnector(conn) {
-  const li = document.createElement('li');
-  li.className = 'tnode';
-
-  const hasChecks = conn.checks.length > 0;
-  const done  = conn.checks.filter(c => c.status === 'done').length;
-  const total = conn.checks.length;
+  const items   = currentMode === 'checks' ? conn.checks : conn.sections;
+  const hasItems = items.length > 0;
+  const done    = items.filter(x => x.status === 'done').length;
+  const total   = items.length;
   const miniPct = total ? Math.round(done / total * 100) : 0;
 
-  const stripeClass = hasChecks
+  const stripeClass = hasItems
     ? (done === total ? 's-done' : 's-wip')
     : 's-nochecks';
+
+  const li    = document.createElement('li');
+  li.className = 'tnode';
 
   const subUl = document.createElement('ul');
   subUl.className = 'tree';
@@ -357,17 +332,13 @@ function renderConnector(conn) {
 
   const labelEl = document.createElement('span');
   labelEl.className = 'label group';
-  let labelHtml = '';
-  if (conn.link) {
-    labelHtml += '<a href="' + conn.link + '" target="_blank">' + conn.type + '</a>';
-  } else {
-    labelHtml += conn.type;
-  }
-  labelHtml += '<span class="mfr-plain">(' + conn.manufacturer + ')</span>';
-  labelEl.innerHTML = labelHtml;
+  labelEl.innerHTML = (conn.link
+    ? '<a href="' + conn.link + '" target="_blank">' + conn.type + '</a>'
+    : conn.type
+  ) + '<span class="mfr-plain">(' + conn.manufacturer + ')</span>';
   topRow.appendChild(labelEl);
 
-  if (hasChecks) {
+  if (hasItems) {
     const countEl = document.createElement('span');
     countEl.className = 'count';
     countEl.innerHTML = '<b>' + done + '</b>/' + total;
@@ -386,19 +357,27 @@ function renderConnector(conn) {
 
   li.appendChild(topRow);
 
-  if (hasChecks) {
-    conn.checks.forEach(ch => subUl.appendChild(renderCheck(ch)));
+  if (hasItems) {
+    items.forEach(item => subUl.appendChild(renderItem(item)));
   } else {
-    subUl.appendChild(renderNoChecks());
+    const text = currentMode === 'checks'
+      ? 'Filter steps not defined — no methodology provided yet'
+      : 'Documentation page not started — no methodology provided yet';
+    subUl.appendChild(renderWarning(text));
   }
   li.appendChild(subUl);
 
   return li;
 }
 
-const root = document.getElementById('root');
-connectors.forEach(conn => root.appendChild(renderConnector(conn)));
-computeStats();
+function rebuild() {
+  const root = document.getElementById('root');
+  root.innerHTML = '';
+  connectors.forEach(conn => root.appendChild(renderConnector(conn)));
+  computeStats();
+}
+
+rebuild();
 </script>
 </body>
 </html>
