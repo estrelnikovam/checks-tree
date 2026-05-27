@@ -9,11 +9,6 @@
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fff; color: #1a1a1a; padding: 1.5rem; }
 .wrap { max-width: 920px; }
 
-.tabs { display: flex; gap: 4px; margin-bottom: 1.25rem; }
-.tab { padding: 6px 18px; border-radius: 6px; border: 1px solid #e0e0da; background: #fff; font-size: 13px; cursor: pointer; color: #888; font-family: inherit; transition: background .15s; }
-.tab.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
-.tab:hover:not(.active) { background: #f5f5f3; }
-
 .topbar { display: flex; gap: 12px; margin-bottom: 1rem; flex-wrap: wrap; }
 .vblock { background: #f5f5f3; border-radius: 8px; padding: 10px 16px; font-size: 13px; flex: 1; min-width: 200px; }
 .vblock-title { font-weight: 500; font-size: 12px; color: #888; margin-bottom: 6px; }
@@ -71,14 +66,9 @@ li.tnode { padding: 0; }
 <body>
 <div class="wrap">
 
-  <div class="tabs">
-    <button class="tab active" id="tab-checks" onclick="setMode('checks')">Checks</button>
-    <button class="tab"        id="tab-docs"   onclick="setMode('docs')">Docs</button>
-  </div>
-
   <div class="topbar">
     <div class="vblock">
-      <div class="vblock-title" id="bar-title">Overall progress</div>
+      <div class="vblock-title">Overall progress</div>
       <div class="vblock-row">
         <div class="vblock-bar">
           <div class="vblock-fill-green" id="bar-done"    style="width:0"></div>
@@ -126,170 +116,210 @@ function sLabel(key){ return (STATUSES.find(x => x.key === key) || { label: key 
 
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
-const SECTION_LABELS = [
-  { id: 'resources',   label: 'Resources' },
-  { id: 'description', label: 'Description' },
-  { id: 'principles',  label: 'Principles of operation' },
-  { id: 'resistance',  label: 'Resistance derivation' },
-  { id: 'inputs',      label: 'Selection algorithm — Input parameters' },
-  { id: 'derived',     label: 'Selection algorithm — Derived parameters' },
-  { id: 'filter',      label: 'Selection algorithm — Filter steps' },
-  { id: 'sorting',     label: 'Selection algorithm — Sorting steps' },
-  { id: 'limitations', label: 'Selection algorithm — Limitations' },
-  { id: 'rfem',        label: 'RFEM Modelling' },
-];
-
-function makeSections(statuses) {
-  // statuses: object {sectionId: 'done'|'todo'|...} or null for no page
-  if (!statuses) return [];
-  return SECTION_LABELS.map(s => ({
-    id: s.id, label: s.label, status: statuses[s.id] || 'todo'
-  }));
-}
+// Each connector: hasPage, sectionStatuses {id: status}, filterSteps [{label, status}]
+// sectionStatuses keys: resources, description, principles, resistance,
+//   inputs, derived, sorting, limitations, rfem
+// filterSteps: individual checks inside "Filter steps" section
 
 const connectors = [
   {
     id: 'col-col',
     type: 'GL Column – GL Column',
     manufacturer: 'ALL3',
-    priority: 1,
     link: 'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1253310468',
-    checks: [
-      { id: 'cc-screw-y', label: 'Screw resistance in y',         status: 'done' },
-      { id: 'cc-screw-z', label: 'Screw resistance in z',         status: 'done' },
-      { id: 'cc-plate',   label: 'Shear resistance — knife plate',status: 'done' },
-      { id: 'cc-dowel',   label: 'Dowel resistance',              status: 'done' },
-      { id: 'cc-glulam',  label: 'Glulam splitting resistance',   status: 'done' },
+    hasPage: true,
+    sectionStatuses: {
+      resources: 'done', description: 'done', principles: 'done', resistance: 'done',
+      inputs: 'done', derived: 'done', sorting: 'done', limitations: 'done', rfem: 'done',
+    },
+    filterSteps: [
+      { label: 'Screw resistance in y',          status: 'done' },
+      { label: 'Screw resistance in z',          status: 'done' },
+      { label: 'Shear resistance (knife plate)', status: 'done' },
+      { label: 'Dowel resistance',               status: 'done' },
+      { label: 'Glulam splitting resistance',    status: 'done' },
     ],
-    sections: makeSections({
-      resources: 'done', description: 'done', principles: 'done',
-      resistance: 'done', inputs: 'done', derived: 'done',
-      filter: 'done', sorting: 'done', limitations: 'done', rfem: 'done',
-    }),
   },
   {
     id: 'col-found-all3',
     type: 'GL Column – Foundation',
     manufacturer: 'ALL3',
-    priority: 2,
     link: 'https://all3.atlassian.net/wiki/spaces/RTAP/pages/1322090503',
-    checks: [
-      { id: 'cf-screw-y',  label: 'Screw resistance in y',          status: 'done' },
-      { id: 'cf-screw-z',  label: 'Screw resistance in z',          status: 'done' },
-      { id: 'cf-anchor-y', label: 'Anchor shear resistance in y',   status: 'done' },
-      { id: 'cf-anchor-z', label: 'Anchor shear resistance in z',   status: 'done' },
-      { id: 'cf-concrete', label: 'Concrete compression resistance', status: 'done' },
+    hasPage: true,
+    sectionStatuses: {
+      resources: 'done', description: 'done', principles: 'done', resistance: 'done',
+      inputs: 'done', derived: 'done', sorting: 'done', limitations: 'done', rfem: 'done',
+    },
+    filterSteps: [
+      { label: 'Screw resistance in y',          status: 'done' },
+      { label: 'Screw resistance in z',          status: 'done' },
+      { label: 'Anchor shear resistance in y',   status: 'done' },
+      { label: 'Anchor shear resistance in z',   status: 'done' },
+      { label: 'Concrete compression resistance',status: 'done' },
     ],
-    sections: makeSections({
-      resources: 'done', description: 'done', principles: 'done',
-      resistance: 'done', inputs: 'done', derived: 'done',
-      filter: 'done', sorting: 'done', limitations: 'done', rfem: 'done',
-    }),
   },
   {
     id: 'beam-col-pitzl',
     type: 'GL Beam – GL Column',
     manufacturer: 'Pitzl HVP',
-    priority: 3,
     link: 'https://all3.atlassian.net/wiki/spaces/RTAP/pages/901349382',
-    checks: [
-      { id: 'bc-screw', label: 'Screw resistance — F2,screw',             status: 'done' },
-      { id: 'bc-alu',   label: 'Aluminium connector resistance — F2,ALU', status: 'done' },
+    hasPage: true,
+    sectionStatuses: {
+      resources: 'done', description: 'done', principles: 'done', resistance: 'done',
+      inputs: 'done', derived: 'done', sorting: 'done', limitations: 'done', rfem: 'done',
+    },
+    filterSteps: [
+      { label: 'Screw resistance',               status: 'done' },
+      { label: 'Aluminium connector resistance', status: 'done' },
     ],
-    sections: makeSections({
-      resources: 'done', description: 'done', principles: 'done',
-      resistance: 'done', inputs: 'done', derived: 'done',
-      filter: 'done', sorting: 'done', limitations: 'done', rfem: 'done',
-    }),
   },
-  { id: 'pfeifer-col',     type: 'Pfeifer Beam – GL Column',              manufacturer: 'Pfeifer',          priority: 4,  checks: [], sections: [] },
-  { id: 'pfeifer-core',    type: 'Pfeifer Beam – Core',                   manufacturer: 'Pfeifer',          priority: 5,  checks: [], sections: [] },
-  { id: 'col-pfeifer',     type: 'GL Column – Pfeifer Beam',              manufacturer: 'Pfeifer',          priority: 6,  checks: [], sections: [] },
-  { id: 'clt-pfeifer',     type: 'CLT Slab – Pfeifer Beam',               manufacturer: 'Pfeifer',          priority: 7,  checks: [], sections: [] },
-  { id: 'clt-wall',        type: 'CLT Slab – Wall',                       manufacturer: 'ALL3',             priority: 8,  checks: [], sections: [] },
-  { id: 'clt-core',        type: 'CLT Slab – Core',                       manufacturer: 'ALL3',             priority: 9,  checks: [], sections: [] },
-  { id: 'tcc-core',        type: 'TCC Slab – Core',                       manufacturer: 'ALL3',             priority: 10, checks: [], sections: [] },
-  { id: 'beam-core-alumega',type: 'GL Beam – Core',                       manufacturer: 'Alumega',          priority: 11, checks: [], sections: [] },
-  { id: 'beam-core-all3',  type: 'GL Beam – Core',                        manufacturer: 'ALL3',             priority: 12, checks: [], sections: [] },
-  { id: 'col-found-peikko',type: 'GL Column – Foundation',                manufacturer: 'Peikko Rooco Shoe',priority: 13, checks: [], sections: [] },
-  { id: 'col-delta-col',   type: 'GL Column – (Delta Beam) – GL Column',  manufacturer: 'Peikko Rooco Shoe',priority: 14, checks: [], sections: [] },
-  { id: 'col-delta',       type: 'GL Column – Delta Beam',                manufacturer: 'Peikko Rooco Shoe',priority: 15, checks: [], sections: [] },
+  { id: 'pfeifer-col',      type: 'Pfeifer Beam – GL Column',             manufacturer: 'Pfeifer',           hasPage: false, sectionStatuses: {}, filterSteps: [] },
+  { id: 'pfeifer-core',     type: 'Pfeifer Beam – Core',                  manufacturer: 'Pfeifer',           hasPage: false, sectionStatuses: {}, filterSteps: [] },
+  { id: 'col-pfeifer',      type: 'GL Column – Pfeifer Beam',             manufacturer: 'Pfeifer',           hasPage: false, sectionStatuses: {}, filterSteps: [] },
+  { id: 'clt-pfeifer',      type: 'CLT Slab – Pfeifer Beam',              manufacturer: 'Pfeifer',           hasPage: false, sectionStatuses: {}, filterSteps: [] },
+  { id: 'clt-wall',         type: 'CLT Slab – Wall',                      manufacturer: 'ALL3',              hasPage: false, sectionStatuses: {}, filterSteps: [] },
+  { id: 'clt-core',         type: 'CLT Slab – Core',                      manufacturer: 'ALL3',              hasPage: false, sectionStatuses: {}, filterSteps: [] },
+  { id: 'tcc-core',         type: 'TCC Slab – Core',                      manufacturer: 'ALL3',              hasPage: false, sectionStatuses: {}, filterSteps: [] },
+  { id: 'beam-core-alumega',type: 'GL Beam – Core',                       manufacturer: 'Alumega',           hasPage: false, sectionStatuses: {}, filterSteps: [] },
+  { id: 'beam-core-all3',   type: 'GL Beam – Core',                       manufacturer: 'ALL3',              hasPage: false, sectionStatuses: {}, filterSteps: [] },
+  { id: 'col-found-peikko', type: 'GL Column – Foundation',               manufacturer: 'Peikko Rooco Shoe', hasPage: false, sectionStatuses: {}, filterSteps: [] },
+  { id: 'col-delta-col',    type: 'GL Column – (Delta Beam) – GL Column', manufacturer: 'Peikko Rooco Shoe', hasPage: false, sectionStatuses: {}, filterSteps: [] },
+  { id: 'col-delta',        type: 'GL Column – Delta Beam',               manufacturer: 'Peikko Rooco Shoe', hasPage: false, sectionStatuses: {}, filterSteps: [] },
 ];
-
-// ─── MODE ────────────────────────────────────────────────────────────────────
-
-let currentMode = 'checks';
-
-function setMode(mode) {
-  currentMode = mode;
-  document.getElementById('tab-checks').classList.toggle('active', mode === 'checks');
-  document.getElementById('tab-docs').classList.toggle('active', mode === 'docs');
-  rebuild();
-}
 
 // ─── STATS ───────────────────────────────────────────────────────────────────
 
+function collectLeaves(conn) {
+  if (!conn.hasPage) return { done: 0, total: 0 };
+  const ss = conn.sectionStatuses;
+  const sectionKeys = ['resources','description','principles','resistance','inputs','derived','sorting','limitations','rfem'];
+  let total = sectionKeys.length + conn.filterSteps.length;
+  let done  = sectionKeys.filter(k => ss[k] === 'done').length
+            + conn.filterSteps.filter(f => f.status === 'done').length;
+  return { done, total };
+}
+
 function computeStats() {
-  const total = connectors.length;
+  const total   = connectors.length;
+  const noPage  = connectors.filter(c => !c.hasPage).length;
+  let leafDone  = 0, leafTotal = 0;
+  connectors.forEach(c => {
+    const l = collectLeaves(c);
+    leafDone  += l.done;
+    leafTotal += l.total;
+  });
+  const donePct    = leafTotal ? Math.round(leafDone  / leafTotal * 100) : 0;
+  const blockedPct = Math.round(noPage / total * 100);
 
-  if (currentMode === 'checks') {
-    const done    = connectors.filter(c => c.checks.length > 0 && c.checks.every(x => x.status === 'done')).length;
-    const blocked = connectors.filter(c => c.checks.length === 0).length;
-    const donePct    = Math.round(done    / total * 100);
-    const blockedPct = Math.round(blocked / total * 100);
-    document.getElementById('bar-title').textContent   = 'Overall progress — Checks';
-    document.getElementById('bar-done').style.width    = donePct + '%';
-    document.getElementById('bar-blocked').style.width = blockedPct + '%';
-    document.getElementById('stat-done').textContent   = done;
-    document.getElementById('stat-total').textContent  = total;
-    document.getElementById('stat-sub').textContent    =
-      done + ' connector' + (done !== 1 ? 's' : '') + ' done · ' +
-      blocked + ' without methodology · ' +
-      (total - done - blocked) + ' in progress';
+  document.getElementById('bar-done').style.width    = donePct + '%';
+  document.getElementById('bar-blocked').style.width = blockedPct + '%';
+  document.getElementById('stat-done').textContent   = leafDone;
+  document.getElementById('stat-total').textContent  = leafTotal;
+  document.getElementById('stat-sub').textContent    =
+    leafDone + '/' + leafTotal + ' items done · ' + noPage + ' connectors without a page';
+}
 
-  } else {
-    const totalSections = connectors.reduce((s, c) => s + c.sections.length, 0);
-    const doneSections  = connectors.reduce((s, c) => s + c.sections.filter(x => x.status === 'done').length, 0);
-    const noPage        = connectors.filter(c => c.sections.length === 0).length;
-    const maxSections   = total * SECTION_LABELS.length;
-    const donePct    = Math.round(doneSections / maxSections * 100);
-    const blockedPct = Math.round(noPage       / total       * 100);
-    document.getElementById('bar-title').textContent   = 'Overall progress — Docs';
-    document.getElementById('bar-done').style.width    = donePct + '%';
-    document.getElementById('bar-blocked').style.width = blockedPct + '%';
-    document.getElementById('stat-done').textContent   = doneSections;
-    document.getElementById('stat-total').textContent  = maxSections;
-    document.getElementById('stat-sub').textContent    =
-      doneSections + '/' + maxSections + ' sections filled · ' +
-      noPage + ' connectors without a page';
-  }
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+
+function derivedStatus(statuses) {
+  if (!statuses.length) return 'todo';
+  if (statuses.every(s => s === 'done'))   return 'done';
+  if (statuses.some(s => s === 'done' || s === 'wip' || s === 'dev' || s === 'qa' || s === 'methodology' || s === 'export' || s === 'review')) return 'wip';
+  return 'todo';
 }
 
 // ─── RENDER ──────────────────────────────────────────────────────────────────
 
-function renderItem(item) {
-  const cls = sCls(item.status);
-  const lbl = sLabel(item.status);
+function makeToggle(subUl, expandAll) {
+  const toggle = document.createElement('div');
+  toggle.className = 'toggle';
+  toggle.textContent = '−';
+  toggle.onclick = function() {
+    const collapsed = subUl.style.display === 'none';
+    if (collapsed) {
+      subUl.style.display = '';
+      if (expandAll) {
+        subUl.querySelectorAll('ul').forEach(ul => ul.style.display = '');
+        subUl.querySelectorAll('.toggle').forEach(t => t.textContent = '−');
+      }
+      toggle.textContent = '−';
+    } else {
+      subUl.style.display = 'none';
+      toggle.textContent = '+';
+    }
+  };
+  return toggle;
+}
+
+function renderLeaf(label, status) {
+  const cls = sCls(status);
+  const lbl = sLabel(status);
   const li = document.createElement('li');
   li.className = 'tnode';
   li.innerHTML =
     '<div class="row">' +
       '<div class="spacer"></div>' +
       '<div class="stripe s-' + cls + '"></div>' +
-      '<span class="label">' + item.label + '</span>' +
+      '<span class="label">' + label + '</span>' +
       '<span class="badge b-' + cls + '">' + lbl + '</span>' +
     '</div>';
   return li;
 }
 
-function renderWarning(text) {
+function renderGroup(label, childrenEl, statuses) {
+  const status = derivedStatus(statuses);
+  const cls    = sCls(status);
+  const lbl    = sLabel(status);
+  const done   = statuses.filter(s => s === 'done').length;
+  const total  = statuses.length;
+  const miniPct = total ? Math.round(done / total * 100) : 0;
+
+  const li    = document.createElement('li');
+  li.className = 'tnode';
+
+  const subUl = document.createElement('ul');
+  subUl.className = 'tree';
+  childrenEl.forEach(c => subUl.appendChild(c));
+
+  // expandAll=true: expanding this group also expands all nested groups
+  const toggle = makeToggle(subUl, true);
+
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.appendChild(toggle);
+
+  const stripe = document.createElement('div');
+  stripe.className = 'stripe s-' + cls;
+  row.appendChild(stripe);
+
+  const labelEl = document.createElement('span');
+  labelEl.className = 'label group';
+  labelEl.textContent = label;
+  row.appendChild(labelEl);
+
+  const countEl = document.createElement('span');
+  countEl.className = 'count';
+  countEl.innerHTML = '<b>' + done + '</b>/' + total;
+  row.appendChild(countEl);
+
+  const miniEl = document.createElement('div');
+  miniEl.className = 'mini';
+  miniEl.innerHTML = '<div class="mini-f" style="width:' + miniPct + '%"></div>';
+  row.appendChild(miniEl);
+
+  li.appendChild(row);
+  li.appendChild(subUl);
+  return li;
+}
+
+function renderWarning() {
   const li = document.createElement('li');
   li.className = 'tnode';
   li.innerHTML =
     '<div class="no-checks-wrap">' +
       '<div class="no-checks-row">' +
         '<span class="no-checks-icon">⚠️</span>' +
-        '<span class="no-checks-text">' + text + '</span>' +
+        '<span class="no-checks-text">Documentation page not started — no methodology provided yet</span>' +
         '<span class="no-checks-tag">[TECH] needed</span>' +
       '</div>' +
     '</div>';
@@ -297,30 +327,66 @@ function renderWarning(text) {
 }
 
 function renderConnector(conn) {
-  const items   = currentMode === 'checks' ? conn.checks : conn.sections;
-  const hasItems = items.length > 0;
-  const done    = items.filter(x => x.status === 'done').length;
-  const total   = items.length;
-  const miniPct = total ? Math.round(done / total * 100) : 0;
-
-  const stripeClass = hasItems
-    ? (done === total ? 's-done' : 's-wip')
-    : 's-nochecks';
-
-  const li    = document.createElement('li');
+  const li     = document.createElement('li');
   li.className = 'tnode';
 
-  const subUl = document.createElement('ul');
+  const subUl  = document.createElement('ul');
   subUl.className = 'tree';
+  // connectors start collapsed
+  subUl.style.display = 'none';
 
-  const toggle = document.createElement('div');
-  toggle.className = 'toggle';
-  toggle.textContent = '−';
-  toggle.onclick = function () {
-    const collapsed = subUl.style.display === 'none';
-    subUl.style.display = collapsed ? '' : 'none';
-    toggle.textContent = collapsed ? '−' : '+';
-  };
+  if (!conn.hasPage) {
+    subUl.appendChild(renderWarning());
+  } else {
+    const ss = conn.sectionStatuses;
+    const fs = conn.filterSteps;
+
+    // Build Filter steps group
+    const fsLeaves   = fs.map(f => renderLeaf(f.label, f.status));
+    const fsStatuses = fs.map(f => f.status);
+    const fsGroup    = renderGroup('Filter steps', fsLeaves, fsStatuses);
+
+    // Build Selection algorithm children
+    const selChildren = [
+      renderLeaf('Input parameters',   ss.inputs      || 'todo'),
+      renderLeaf('Derived parameters', ss.derived     || 'todo'),
+      fsGroup,
+      renderLeaf('Sorting steps',      ss.sorting     || 'todo'),
+      renderLeaf('Limitations',        ss.limitations || 'todo'),
+    ];
+    const selStatuses = [
+      ss.inputs || 'todo', ss.derived || 'todo',
+      derivedStatus(fsStatuses),
+      ss.sorting || 'todo', ss.limitations || 'todo',
+    ];
+    const selGroup = renderGroup('Selection algorithm', selChildren, selStatuses);
+
+    // Top-level sections
+    [
+      ['Resources',               ss.resources   || 'todo'],
+      ['Description',             ss.description || 'todo'],
+      ['Principles of operation', ss.principles  || 'todo'],
+      ['Resistance derivation',   ss.resistance  || 'todo'],
+    ].forEach(([lbl, st]) => subUl.appendChild(renderLeaf(lbl, st)));
+
+    subUl.appendChild(selGroup);
+    subUl.appendChild(renderLeaf('RFEM Modelling', ss.rfem || 'todo'));
+  }
+
+  // Connector header row
+  const allLeafStatuses = conn.hasPage
+    ? Object.values(conn.sectionStatuses).concat(conn.filterSteps.map(f => f.status))
+    : [];
+  const done  = allLeafStatuses.filter(s => s === 'done').length;
+  const total = allLeafStatuses.length;
+  const miniPct = total ? Math.round(done / total * 100) : 0;
+  const stripeClass = !conn.hasPage ? 's-nochecks'
+    : done === total && total > 0  ? 's-done'
+    : done > 0                     ? 's-wip'
+    : 's-todo';
+
+  const toggle = makeToggle(subUl, false);
+  toggle.textContent = '+';
 
   const topRow = document.createElement('div');
   topRow.className = 'row';
@@ -338,7 +404,7 @@ function renderConnector(conn) {
   ) + '<span class="mfr-plain">(' + conn.manufacturer + ')</span>';
   topRow.appendChild(labelEl);
 
-  if (hasItems) {
+  if (conn.hasPage) {
     const countEl = document.createElement('span');
     countEl.className = 'count';
     countEl.innerHTML = '<b>' + done + '</b>/' + total;
@@ -356,28 +422,13 @@ function renderConnector(conn) {
   }
 
   li.appendChild(topRow);
-
-  if (hasItems) {
-    items.forEach(item => subUl.appendChild(renderItem(item)));
-  } else {
-    const text = currentMode === 'checks'
-      ? 'Filter steps not defined — no methodology provided yet'
-      : 'Documentation page not started — no methodology provided yet';
-    subUl.appendChild(renderWarning(text));
-  }
   li.appendChild(subUl);
-
   return li;
 }
 
-function rebuild() {
-  const root = document.getElementById('root');
-  root.innerHTML = '';
-  connectors.forEach(conn => root.appendChild(renderConnector(conn)));
-  computeStats();
-}
-
-rebuild();
+const root = document.getElementById('root');
+connectors.forEach(conn => root.appendChild(renderConnector(conn)));
+computeStats();
 </script>
-<!-- v2 --></body>
+</body>
 </html>
