@@ -23,10 +23,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .legend { display: flex; gap: 8px; font-size: 12px; color: #888; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; }
 .badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; white-space: nowrap; flex-shrink: 0; }
 .b-done     { background: #EAF3DE; color: #3B6D11; }
-.b-todo     { background: #f0f0ec; color: #888; }
+.b-todo     { background: #FCEBEB; color: #A32D2D; }
 .b-onhold   { background: #f0f0ec; color: #888; }
 .b-wip      { background: #FFF3DC; color: #8a5c00; }
-.b-nochecks { background: #FCEBEB; color: #A32D2D; font-weight: 600; }
 
 .mfr-plain { font-size: 13px; color: #888; font-weight: 400; margin-left: 3px; }
 
@@ -48,9 +47,8 @@ li.tnode { padding: 0; }
 .stripe { width: 8px; flex-shrink: 0; border-radius: 2px; align-self: stretch; min-height: 22px; }
 .s-done     { background: #1D9E75; }
 .s-wip      { background: #EF9F27; }
-.s-todo     { background: #ccc; }
+.s-todo     { background: #E24B4A; }
 .s-onhold   { background: #ccc; }
-.s-nochecks { background: #E24B4A; }
 
 .no-checks-wrap { margin: 3px 0 3px 23px; }
 .no-checks-row {
@@ -71,8 +69,7 @@ li.tnode { padding: 0; }
       <div class="vblock-title">Overall progress</div>
       <div class="vblock-row">
         <div class="vblock-bar">
-          <div class="vblock-fill-green" id="bar-done"    style="width:0"></div>
-          <div class="vblock-fill-red"   id="bar-blocked" style="width:0"></div>
+          <div class="vblock-fill-green" id="bar-done" style="width:0"></div>
         </div>
         <span class="vblock-num"><b id="stat-done">0</b>/<span id="stat-total">0</span> done</span>
       </div>
@@ -81,7 +78,7 @@ li.tnode { padding: 0; }
   </div>
 
   <div class="legend">
-    <span class="badge b-todo">To do</span>
+    <span class="badge b-todo">To do <span style="opacity:.6;font-size:10px">[TECH]</span></span>
     <span style="color:#ccc;font-size:11px">→</span>
     <span class="badge b-wip">Methodology <span style="opacity:.6;font-size:10px">[TECH]</span></span>
     <span style="color:#ccc;font-size:11px">→</span>
@@ -93,33 +90,36 @@ li.tnode { padding: 0; }
     <span style="color:#ccc;font-size:11px">→</span>
     <span class="badge b-wip">Review <span style="opacity:.6;font-size:10px">[TECH]</span></span>
     <span style="color:#ccc;font-size:11px">→</span>
+    <span class="badge b-wip">Export to RFEM <span style="opacity:.6;font-size:10px">[RTA]</span></span>
+    <span style="color:#ccc;font-size:11px">→</span>
+    <span class="badge b-wip">Export to Procurement <span style="opacity:.6;font-size:10px">[RTA]</span></span>
+    <span style="color:#ccc;font-size:11px">→</span>
     <span class="badge b-done">Done</span>
     <span class="badge b-onhold" style="margin-left:8px">On Hold</span>
-    <span class="badge b-nochecks" style="margin-left:8px">⚠ No methodology</span>
   </div>
 
   <ul class="tree" id="root"></ul>
 </div>
 <script>
 const STATUSES = [
-  { key: 'todo',        label: 'To Do',           cls: 'todo'   },
-  { key: 'onhold',      label: 'On Hold',          cls: 'onhold' },
-  { key: 'methodology', label: 'Methodology',      cls: 'wip'    },
-  { key: 'dev',         label: 'Dev',              cls: 'wip'    },
-  { key: 'qa',          label: 'QA',               cls: 'wip'    },
-  { key: 'export',      label: 'Export to report', cls: 'wip'    },
-  { key: 'review',      label: 'Review',           cls: 'wip'    },
-  { key: 'done',        label: 'Done',             cls: 'done'   },
+  { key: 'todo',               label: 'To Do',                cls: 'todo'   },
+  { key: 'onhold',             label: 'On Hold',              cls: 'onhold' },
+  { key: 'methodology',        label: 'Methodology',          cls: 'wip'    },
+  { key: 'dev',                label: 'Dev',                  cls: 'wip'    },
+  { key: 'qa',                 label: 'QA',                   cls: 'wip'    },
+  { key: 'export',             label: 'Export to report',     cls: 'wip'    },
+  { key: 'review',             label: 'Review',               cls: 'wip'    },
+  { key: 'export_rfem',        label: 'Export to RFEM',       cls: 'wip'    },
+  { key: 'export_procurement', label: 'Export to Procurement',cls: 'wip'    },
+  { key: 'done',               label: 'Done',                 cls: 'done'   },
 ];
 function sCls(key)  { return (STATUSES.find(x => x.key === key) || { cls: 'todo' }).cls; }
 function sLabel(key){ return (STATUSES.find(x => x.key === key) || { label: key }).label; }
 
 // ─── DATA ────────────────────────────────────────────────────────────────────
-
-// Each connector: hasPage, sectionStatuses {id: status}, filterSteps [{label, status}]
 // sectionStatuses keys: resources, description, principles, resistance,
 //   inputs, derived, sorting, limitations, rfem
-// filterSteps: individual checks inside "Filter steps" section
+// filterSteps: individual checks inside Selection algorithm → Filter steps
 
 const connectors = [
   {
@@ -151,11 +151,11 @@ const connectors = [
       inputs: 'done', derived: 'done', sorting: 'done', limitations: 'done', rfem: 'done',
     },
     filterSteps: [
-      { label: 'Screw resistance in y',          status: 'done' },
-      { label: 'Screw resistance in z',          status: 'done' },
-      { label: 'Anchor shear resistance in y',   status: 'done' },
-      { label: 'Anchor shear resistance in z',   status: 'done' },
-      { label: 'Concrete compression resistance',status: 'done' },
+      { label: 'Screw resistance in y',           status: 'done' },
+      { label: 'Screw resistance in z',           status: 'done' },
+      { label: 'Anchor shear resistance in y',    status: 'done' },
+      { label: 'Anchor shear resistance in z',    status: 'done' },
+      { label: 'Concrete compression resistance', status: 'done' },
     ],
   },
   {
@@ -189,42 +189,38 @@ const connectors = [
 
 // ─── STATS ───────────────────────────────────────────────────────────────────
 
+const SECTION_KEYS = ['resources','description','principles','resistance','inputs','derived','sorting','limitations','rfem'];
+
 function collectLeaves(conn) {
-  if (!conn.hasPage) return { done: 0, total: 0 };
   const ss = conn.sectionStatuses;
-  const sectionKeys = ['resources','description','principles','resistance','inputs','derived','sorting','limitations','rfem'];
-  let total = sectionKeys.length + conn.filterSteps.length;
-  let done  = sectionKeys.filter(k => ss[k] === 'done').length
-            + conn.filterSteps.filter(f => f.status === 'done').length;
+  const total = SECTION_KEYS.length + conn.filterSteps.length;
+  const done  = SECTION_KEYS.filter(k => ss[k] === 'done').length
+              + conn.filterSteps.filter(f => f.status === 'done').length;
   return { done, total };
 }
 
 function computeStats() {
-  const total   = connectors.length;
-  const noPage  = connectors.filter(c => !c.hasPage).length;
-  let leafDone  = 0, leafTotal = 0;
+  let leafDone = 0, leafTotal = 0;
   connectors.forEach(c => {
     const l = collectLeaves(c);
     leafDone  += l.done;
     leafTotal += l.total;
   });
-  const donePct    = leafTotal ? Math.round(leafDone  / leafTotal * 100) : 0;
-  const blockedPct = Math.round(noPage / total * 100);
-
-  document.getElementById('bar-done').style.width    = donePct + '%';
-  document.getElementById('bar-blocked').style.width = blockedPct + '%';
-  document.getElementById('stat-done').textContent   = leafDone;
-  document.getElementById('stat-total').textContent  = leafTotal;
-  document.getElementById('stat-sub').textContent    =
-    leafDone + '/' + leafTotal + ' items done · ' + noPage + ' connectors without a page';
+  const donePct = leafTotal ? Math.round(leafDone / leafTotal * 100) : 0;
+  document.getElementById('bar-done').style.width  = donePct + '%';
+  document.getElementById('stat-done').textContent = leafDone;
+  document.getElementById('stat-total').textContent = leafTotal;
+  document.getElementById('stat-sub').textContent   = leafDone + '/' + leafTotal + ' items done';
 }
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
 function derivedStatus(statuses) {
   if (!statuses.length) return 'todo';
-  if (statuses.every(s => s === 'done'))   return 'done';
-  if (statuses.some(s => s === 'done' || s === 'wip' || s === 'dev' || s === 'qa' || s === 'methodology' || s === 'export' || s === 'review')) return 'wip';
+  if (statuses.every(s => s === 'done')) return 'done';
+  if (statuses.some(s => s === 'done' || s === 'wip' || s === 'dev' || s === 'qa'
+                      || s === 'methodology' || s === 'export' || s === 'review'
+                      || s === 'export_rfem' || s === 'export_procurement')) return 'wip';
   return 'todo';
 }
 
@@ -252,8 +248,7 @@ function makeToggle(subUl, expandAll) {
 }
 
 function renderLeaf(label, status) {
-  const cls = sCls(status);
-  const lbl = sLabel(status);
+  const cls = sCls(status), lbl = sLabel(status);
   const li = document.createElement('li');
   li.className = 'tnode';
   li.innerHTML =
@@ -267,21 +262,19 @@ function renderLeaf(label, status) {
 }
 
 function renderGroup(label, childrenEl, statuses) {
-  const status = derivedStatus(statuses);
-  const cls    = sCls(status);
-  const lbl    = sLabel(status);
-  const done   = statuses.filter(s => s === 'done').length;
-  const total  = statuses.length;
+  const status  = derivedStatus(statuses);
+  const cls     = sCls(status);
+  const done    = statuses.filter(s => s === 'done').length;
+  const total   = statuses.length;
   const miniPct = total ? Math.round(done / total * 100) : 0;
 
-  const li    = document.createElement('li');
+  const li = document.createElement('li');
   li.className = 'tnode';
 
   const subUl = document.createElement('ul');
   subUl.className = 'tree';
   childrenEl.forEach(c => subUl.appendChild(c));
 
-  // expandAll=true: expanding this group also expands all nested groups
   const toggle = makeToggle(subUl, true);
 
   const row = document.createElement('div');
@@ -312,78 +305,64 @@ function renderGroup(label, childrenEl, statuses) {
   return li;
 }
 
-function renderWarning() {
+function renderConnector(conn) {
   const li = document.createElement('li');
   li.className = 'tnode';
-  li.innerHTML =
-    '<div class="no-checks-wrap">' +
-      '<div class="no-checks-row">' +
-        '<span class="no-checks-icon">⚠️</span>' +
-        '<span class="no-checks-text">Documentation page not started — no methodology provided yet</span>' +
-        '<span class="no-checks-tag">[TECH] needed</span>' +
-      '</div>' +
-    '</div>';
-  return li;
-}
 
-function renderConnector(conn) {
-  const li     = document.createElement('li');
-  li.className = 'tnode';
-
-  const subUl  = document.createElement('ul');
+  const subUl = document.createElement('ul');
   subUl.className = 'tree';
-  // connectors start collapsed
   subUl.style.display = 'none';
 
-  if (!conn.hasPage) {
-    subUl.appendChild(renderWarning());
-  } else {
-    const ss = conn.sectionStatuses;
-    const fs = conn.filterSteps;
+  const ss = conn.sectionStatuses;
+  const fs = conn.filterSteps;
 
-    // Build Filter steps group
-    const fsLeaves   = fs.map(f => renderLeaf(f.label, f.status));
-    const fsStatuses = fs.map(f => f.status);
-    const fsGroup    = renderGroup('Filter steps', fsLeaves, fsStatuses);
+  const fsLeaves   = fs.map(f => renderLeaf(f.label, f.status));
+  const fsStatuses = fs.map(f => f.status);
+  const fsGroup    = renderGroup('Filter steps', fsLeaves, fsStatuses);
 
-    // Build Selection algorithm children
-    const selChildren = [
-      renderLeaf('Input parameters',   ss.inputs      || 'todo'),
-      renderLeaf('Derived parameters', ss.derived     || 'todo'),
-      fsGroup,
-      renderLeaf('Sorting steps',      ss.sorting     || 'todo'),
-      renderLeaf('Limitations',        ss.limitations || 'todo'),
-    ];
-    const selStatuses = [
-      ss.inputs || 'todo', ss.derived || 'todo',
-      derivedStatus(fsStatuses),
-      ss.sorting || 'todo', ss.limitations || 'todo',
-    ];
-    const selGroup = renderGroup('Selection algorithm', selChildren, selStatuses);
+  const selChildren = [
+    renderLeaf('Input parameters',   ss.inputs      || 'todo'),
+    renderLeaf('Derived parameters', ss.derived     || 'todo'),
+    fsGroup,
+    renderLeaf('Sorting steps',      ss.sorting     || 'todo'),
+    renderLeaf('Limitations',        ss.limitations || 'todo'),
+  ];
+  const selStatuses = [
+    ss.inputs      || 'todo',
+    ss.derived     || 'todo',
+    derivedStatus(fsStatuses),
+    ss.sorting     || 'todo',
+    ss.limitations || 'todo',
+  ];
+  const selGroup = renderGroup('Selection algorithm', selChildren, selStatuses);
 
-    // Top-level sections
-    [
-      ['Resources',               ss.resources   || 'todo'],
-      ['Description',             ss.description || 'todo'],
-      ['Principles of operation', ss.principles  || 'todo'],
-      ['Resistance derivation',   ss.resistance  || 'todo'],
-    ].forEach(([lbl, st]) => subUl.appendChild(renderLeaf(lbl, st)));
+  [
+    ['Resources',               ss.resources   || 'todo'],
+    ['Description',             ss.description || 'todo'],
+    ['Principles of operation', ss.principles  || 'todo'],
+    ['Resistance derivation',   ss.resistance  || 'todo'],
+  ].forEach(([lbl, st]) => subUl.appendChild(renderLeaf(lbl, st)));
 
-    subUl.appendChild(selGroup);
-    subUl.appendChild(renderLeaf('RFEM Modelling', ss.rfem || 'todo'));
-  }
+  subUl.appendChild(selGroup);
+  subUl.appendChild(renderLeaf('RFEM Modelling', ss.rfem || 'todo'));
 
-  // Connector header row
-  const allLeafStatuses = conn.hasPage
-    ? Object.values(conn.sectionStatuses).concat(conn.filterSteps.map(f => f.status))
-    : [];
-  const done  = allLeafStatuses.filter(s => s === 'done').length;
-  const total = allLeafStatuses.length;
+  const allLeafStatuses = SECTION_KEYS.map(k => ss[k] || 'todo').concat(fs.map(f => f.status));
+  const done    = allLeafStatuses.filter(s => s === 'done').length;
+  const total   = allLeafStatuses.length;
   const miniPct = total ? Math.round(done / total * 100) : 0;
-  const stripeClass = !conn.hasPage ? 's-nochecks'
-    : done === total && total > 0  ? 's-done'
-    : done > 0                     ? 's-wip'
-    : 's-todo';
+  const stripeClass = done === total ? 's-done' : done > 0 ? 's-wip' : 's-todo';
+
+  if (done === 0) {
+    subUl.innerHTML = '';
+    const warn = document.createElement('li');
+    warn.className = 'tnode';
+    warn.innerHTML =
+      '<div class="no-checks-wrap"><div class="no-checks-row">' +
+      '<span class="no-checks-icon">⚠️</span>' +
+      '<span class="no-checks-text">No methodology provided yet</span>' +
+      '</div></div>';
+    subUl.appendChild(warn);
+  }
 
   const toggle = makeToggle(subUl, false);
   toggle.textContent = '+';
@@ -404,7 +383,12 @@ function renderConnector(conn) {
   ) + '<span class="mfr-plain">(' + conn.manufacturer + ')</span>';
   topRow.appendChild(labelEl);
 
-  if (conn.hasPage) {
+  if (done === 0) {
+    const badge = document.createElement('span');
+    badge.className = 'badge b-todo';
+    badge.innerHTML = 'To do <span style="opacity:.6;font-size:10px">[TECH]</span>';
+    topRow.appendChild(badge);
+  } else {
     const countEl = document.createElement('span');
     countEl.className = 'count';
     countEl.innerHTML = '<b>' + done + '</b>/' + total;
@@ -414,11 +398,6 @@ function renderConnector(conn) {
     miniEl.className = 'mini';
     miniEl.innerHTML = '<div class="mini-f" style="width:' + miniPct + '%"></div>';
     topRow.appendChild(miniEl);
-  } else {
-    const badge = document.createElement('span');
-    badge.className = 'badge b-nochecks';
-    badge.textContent = '⚠ No methodology';
-    topRow.appendChild(badge);
   }
 
   li.appendChild(topRow);
