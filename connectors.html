@@ -59,10 +59,56 @@ li.tnode { padding: 0; }
 .no-checks-icon { font-size: 14px; flex-shrink: 0; }
 .no-checks-text { font-size: 12px; color: #b02020; flex: 1; line-height: 1.4; }
 .no-checks-tag  { font-size: 10px; background: #FCEBEB; color: #A32D2D; border-radius: 8px; padding: 1px 7px; white-space: nowrap; font-weight: 600; }
+
+/* ─── editing / comments ─────────────────────────────────────────────────── */
+.badge.editable { cursor: pointer; }
+.badge.editable:hover { outline: 1.5px solid rgba(0,0,0,.18); }
+.cmt-icon { display: inline-flex; align-items: center; margin-left: 4px; color: #9a9a9a; cursor: default; flex-shrink: 0; }
+.cmt-icon:hover { color: #555; }
+.cmt-icon svg { display: block; }
+
+#tip {
+  position: fixed; z-index: 3000; max-width: 280px; display: none;
+  background: #fff; color: #333; font-size: 12px; line-height: 1.5;
+  padding: 9px 11px; border: 1px solid #e2e2dc; border-radius: 6px; pointer-events: none;
+  box-shadow: 0 6px 20px rgba(0,0,0,.12); white-space: pre-wrap;
+}
+#tip .tip-meta { color: #999; font-size: 11px; margin-top: 6px; padding-top: 6px; border-top: 1px solid #efefe9; }
+
+#conn-banner {
+  display: none; background: #fff6f6; border: 1px dashed #f0a0a0; color: #b02020;
+  font-size: 12px; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px;
+}
+
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 4000;
+  display: none; align-items: center; justify-content: center;
+}
+.modal {
+  background: #fff; border-radius: 10px; padding: 18px 20px; width: 360px; max-width: 92vw;
+  box-shadow: 0 12px 44px rgba(0,0,0,.28);
+}
+.modal-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.modal-sub { font-size: 11px; color: #999; margin-bottom: 10px; }
+.modal-lbl { display: block; font-size: 11px; color: #888; margin: 12px 0 4px; }
+.modal select, .modal textarea, .modal input {
+  width: 100%; font-size: 13px; padding: 7px 9px; border: 1px solid #ddd;
+  border-radius: 6px; font-family: inherit; color: #1a1a1a; background: #fff;
+}
+.modal textarea { resize: vertical; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+.btn { font-size: 13px; padding: 7px 16px; border-radius: 6px; border: 1px solid transparent; cursor: pointer; font-family: inherit; }
+.btn-ghost { background: #f0f0ec; color: #444; }
+.btn-ghost:hover { background: #e6e6e0; }
+.btn-primary { background: #185FA5; color: #fff; }
+.btn-primary:hover { background: #134d85; }
+.modal-err { color: #b02020; font-size: 12px; margin-top: 10px; min-height: 14px; }
 </style>
 </head>
 <body>
 <div class="wrap">
+
+  <div id="conn-banner"></div>
 
   <div class="topbar">
     <div class="vblock">
@@ -100,7 +146,53 @@ li.tnode { padding: 0; }
 
   <ul class="tree" id="root"></ul>
 </div>
-<script>
+
+<!-- shared tooltip -->
+<div id="tip"></div>
+
+<!-- status editor -->
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal">
+    <div class="modal-title" id="modal-node-label"></div>
+    <div class="modal-sub" id="modal-node-path"></div>
+
+    <label class="modal-lbl" for="modal-status">Status</label>
+    <select id="modal-status"></select>
+
+    <label class="modal-lbl" for="modal-comment">Comment (shown on hover)</label>
+    <textarea id="modal-comment" rows="3" placeholder="What changed / why — optional"></textarea>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="modal-save">Save</button>
+    </div>
+    <div class="modal-err" id="modal-err"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, onSnapshot, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ─── FIREBASE CONFIG ───────────────────────────────────────────────────────
+// Paste the config from Firebase console → Project settings → Your apps → Web app.
+// These values are NOT secret — they are meant to live in client code.
+const firebaseConfig = {
+  apiKey:            "AIzaSyC_svsE2-fbrK9paYj0guRKjKqYBnTLX98",
+  authDomain:        "rta-connectors.firebaseapp.com",
+  projectId:         "rta-connectors",
+  storageBucket:     "rta-connectors.firebasestorage.app",
+  messagingSenderId: "391974947370",
+  appId:             "1:391974947370:web:49dd71cf2498bd8e1ad153",
+  measurementId:     "G-528JR1JMVH",
+};
+const COLLECTION = 'connectorStatus';
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+// ─── STATUSES ──────────────────────────────────────────────────────────────
 const STATUSES = [
   { key: 'todo',               label: 'To Do',                cls: 'todo'   },
   { key: 'onhold',             label: 'On Hold',              cls: 'onhold' },
@@ -116,10 +208,11 @@ const STATUSES = [
 function sCls(key)  { return (STATUSES.find(x => x.key === key) || { cls: 'todo' }).cls; }
 function sLabel(key){ return (STATUSES.find(x => x.key === key) || { label: key }).label; }
 
-// ─── DATA ────────────────────────────────────────────────────────────────────
+// ─── DATA (seed) ─────────────────────────────────────────────────────────────
 // sectionStatuses keys: resources, description, principles, resistance,
 //   inputs, derived, sorting, limitations, rfem
 // filterSteps: individual checks inside Selection algorithm → Filter steps
+// Live status + comments are stored in Firestore and overlaid on top of this seed.
 
 const connectors = [
   {
@@ -187,50 +280,135 @@ const connectors = [
   { id: 'col-delta',        type: 'GL Column – Delta Beam',               manufacturer: 'Peikko Rooco Shoe', hasPage: false, sectionStatuses: {}, filterSteps: [] },
 ];
 
-// ─── STATS ───────────────────────────────────────────────────────────────────
-
 const SECTION_KEYS = ['resources','description','principles','resistance','inputs','derived','sorting','limitations','rfem'];
 
-function collectLeaves(conn) {
-  const ss = conn.sectionStatuses;
-  const total = SECTION_KEYS.length + conn.filterSteps.length;
-  const done  = SECTION_KEYS.filter(k => ss[k] === 'done').length
-              + conn.filterSteps.filter(f => f.status === 'done').length;
-  return { done, total };
-}
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let overrides = {};      // nodeKey -> { status, comment, author, label, updatedAt }
+const openState = {};    // toggle stateKey -> boolean (remembers expand/collapse across re-renders)
 
+// Effective status of a leaf: Firestore override wins over seed.
+function leafStatus(nodeKey, seedStatus) {
+  const o = overrides[nodeKey];
+  return (o && o.status) ? o.status : (seedStatus || 'todo');
+}
+function effSection(conn, key) { return leafStatus(conn.id + ':' + key, conn.sectionStatuses[key] || 'todo'); }
+function effFilter(conn, i)    { return leafStatus(conn.id + ':fs:' + i, conn.filterSteps[i].status); }
+
+// ─── STATS ─────────────────────────────────────────────────────────────────
 function computeStats() {
   let leafDone = 0, leafTotal = 0;
   connectors.forEach(c => {
-    const l = collectLeaves(c);
-    leafDone  += l.done;
-    leafTotal += l.total;
+    const statuses = SECTION_KEYS.map(k => effSection(c, k))
+                                 .concat(c.filterSteps.map((f, i) => effFilter(c, i)));
+    leafTotal += statuses.length;
+    leafDone  += statuses.filter(s => s === 'done').length;
   });
   const donePct = leafTotal ? Math.round(leafDone / leafTotal * 100) : 0;
-  document.getElementById('bar-done').style.width  = donePct + '%';
-  document.getElementById('stat-done').textContent = leafDone;
+  document.getElementById('bar-done').style.width   = donePct + '%';
+  document.getElementById('stat-done').textContent  = leafDone;
   document.getElementById('stat-total').textContent = leafTotal;
   document.getElementById('stat-sub').textContent   = leafDone + '/' + leafTotal + ' items done';
 }
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-
+// ─── DERIVED STATUS ──────────────────────────────────────────────────────────
+const WIP_KEYS = ['done','wip','dev','qa','methodology','export','review','export_rfem','export_procurement'];
 function derivedStatus(statuses) {
   if (!statuses.length) return 'todo';
   if (statuses.every(s => s === 'done')) return 'done';
-  if (statuses.some(s => s === 'done' || s === 'wip' || s === 'dev' || s === 'qa'
-                      || s === 'methodology' || s === 'export' || s === 'review'
-                      || s === 'export_rfem' || s === 'export_procurement')) return 'wip';
+  if (statuses.some(s => WIP_KEYS.includes(s))) return 'wip';
   return 'todo';
 }
 
-// ─── RENDER ──────────────────────────────────────────────────────────────────
+// ─── TOOLTIP ───────────────────────────────────────────────────────────────
+const tip = document.getElementById('tip');
+function fmtDate(ts) {
+  if (!ts || !ts.toDate) return '';
+  const d = ts.toDate();
+  const p = n => String(n).padStart(2, '0');
+  return p(d.getDate()) + '.' + p(d.getMonth() + 1) + '.' + d.getFullYear() + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+function attachTip(el, meta) {
+  el.addEventListener('mouseenter', () => {
+    const when = fmtDate(meta.updatedAt);
+    let html = '';
+    if (meta.comment) html += esc(meta.comment);
+    if (when) html += '<div class="tip-meta">Updated · ' + esc(when) + '</div>';
+    if (!html) return;
+    tip.innerHTML = html;
+    tip.style.display = 'block';
+  });
+  el.addEventListener('mousemove', e => {
+    const pad = 14;
+    let x = e.clientX + pad, y = e.clientY + pad;
+    const r = tip.getBoundingClientRect();
+    if (x + r.width  > window.innerWidth)  x = e.clientX - r.width  - pad;
+    if (y + r.height > window.innerHeight) y = e.clientY - r.height - pad;
+    tip.style.left = x + 'px';
+    tip.style.top  = y + 'px';
+  });
+  el.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+}
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
 
-function makeToggle(subUl, expandAll) {
+// ─── EDITOR MODAL ────────────────────────────────────────────────────────────
+const backdrop  = document.getElementById('modal-backdrop');
+const selEl     = document.getElementById('modal-status');
+const commentEl = document.getElementById('modal-comment');
+const errEl     = document.getElementById('modal-err');
+let editing = null; // { key, seed, label, path }
+
+STATUSES.forEach(s => {
+  const opt = document.createElement('option');
+  opt.value = s.key; opt.textContent = s.label;
+  selEl.appendChild(opt);
+});
+
+function openEditor(key, seed, label, path) {
+  editing = { key, seed, label, path };
+  const meta = overrides[key] || {};
+  document.getElementById('modal-node-label').textContent = label;
+  document.getElementById('modal-node-path').textContent  = path || '';
+  selEl.value     = meta.status || seed || 'todo';
+  commentEl.value = meta.comment || '';
+  errEl.textContent = '';
+  backdrop.style.display = 'flex';
+  selEl.focus();
+}
+function closeEditor() { backdrop.style.display = 'none'; editing = null; }
+
+async function saveEditor() {
+  if (!editing) return;
+  const comment = commentEl.value.trim();
+  const status  = selEl.value;
+  errEl.textContent = 'Saving…';
+  try {
+    await setDoc(doc(db, COLLECTION, editing.key), {
+      status, comment,
+      label: editing.label,
+      path:  editing.path || '',
+      updatedAt: serverTimestamp(),
+    });
+    closeEditor(); // re-render happens via onSnapshot
+  } catch (e) {
+    errEl.textContent = 'Could not save: ' + (e && e.message ? e.message : e);
+  }
+}
+
+document.getElementById('modal-save').onclick   = saveEditor;
+document.getElementById('modal-cancel').onclick = closeEditor;
+backdrop.addEventListener('click', e => { if (e.target === backdrop) closeEditor(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && editing) closeEditor(); });
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function makeToggle(subUl, expandAll, stateKey, defaultOpen) {
   const toggle = document.createElement('div');
   toggle.className = 'toggle';
-  toggle.textContent = '−';
-  toggle.onclick = function() {
+  const open = (stateKey in openState) ? openState[stateKey] : defaultOpen;
+  subUl.style.display = open ? '' : 'none';
+  toggle.textContent  = open ? '−' : '+';
+  toggle.onclick = function () {
     const collapsed = subUl.style.display === 'none';
     if (collapsed) {
       subUl.style.display = '';
@@ -239,29 +417,55 @@ function makeToggle(subUl, expandAll) {
         subUl.querySelectorAll('.toggle').forEach(t => t.textContent = '−');
       }
       toggle.textContent = '−';
+      openState[stateKey] = true;
     } else {
       subUl.style.display = 'none';
       toggle.textContent = '+';
+      openState[stateKey] = false;
     }
   };
   return toggle;
 }
 
-function renderLeaf(label, status) {
+function renderLeaf(label, nodeKey, seedStatus, path) {
+  const status = leafStatus(nodeKey, seedStatus);
+  const meta   = overrides[nodeKey];
   const cls = sCls(status), lbl = sLabel(status);
+
   const li = document.createElement('li');
   li.className = 'tnode';
-  li.innerHTML =
-    '<div class="row">' +
-      '<div class="spacer"></div>' +
-      '<div class="stripe s-' + cls + '"></div>' +
-      '<span class="label">' + label + '</span>' +
-      '<span class="badge b-' + cls + '">' + lbl + '</span>' +
-    '</div>';
+
+  const row = document.createElement('div');
+  row.className = 'row';
+
+  const spacer = document.createElement('div'); spacer.className = 'spacer'; row.appendChild(spacer);
+  const stripe = document.createElement('div'); stripe.className = 'stripe s-' + cls; row.appendChild(stripe);
+  const labelEl = document.createElement('span'); labelEl.className = 'label'; labelEl.textContent = label; row.appendChild(labelEl);
+
+  const badge = document.createElement('span');
+  badge.className = 'badge editable b-' + cls;
+  badge.textContent = lbl;
+  badge.onclick = () => openEditor(nodeKey, seedStatus, label, path);
+  row.appendChild(badge);
+
+  if (meta) {
+    attachTip(badge, meta);
+    if (meta.comment) {
+      const ic = document.createElement('span');
+      ic.className = 'cmt-icon';
+      ic.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M3 2.5h10a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 13 11.5H7l-3.5 2.8V11.5H3A1.5 1.5 0 0 1 1.5 10V4A1.5 1.5 0 0 1 3 2.5z"/>' +
+        '<path d="M4.5 6h7M4.5 8.3h4.5"/></svg>';
+      attachTip(ic, meta);
+      row.appendChild(ic);
+    }
+  }
+
+  li.appendChild(row);
   return li;
 }
 
-function renderGroup(label, childrenEl, statuses) {
+function renderGroup(label, childrenEl, statuses, stateKey) {
   const status  = derivedStatus(statuses);
   const cls     = sCls(status);
   const done    = statuses.filter(s => s === 'done').length;
@@ -275,7 +479,7 @@ function renderGroup(label, childrenEl, statuses) {
   subUl.className = 'tree';
   childrenEl.forEach(c => subUl.appendChild(c));
 
-  const toggle = makeToggle(subUl, true);
+  const toggle = makeToggle(subUl, true, stateKey, true);
 
   const row = document.createElement('div');
   row.className = 'row';
@@ -311,61 +515,65 @@ function renderConnector(conn) {
 
   const subUl = document.createElement('ul');
   subUl.className = 'tree';
-  subUl.style.display = 'none';
 
-  const ss = conn.sectionStatuses;
-  const fs = conn.filterSteps;
+  const ctx = conn.type + ' (' + conn.manufacturer + ')';
 
-  const fsLeaves   = fs.map(f => renderLeaf(f.label, f.status));
-  const fsStatuses = fs.map(f => f.status);
-  const fsGroup    = renderGroup('Filter steps', fsLeaves, fsStatuses);
+  // Filter steps
+  const fsLeaves   = conn.filterSteps.map((f, i) =>
+    renderLeaf(f.label, conn.id + ':fs:' + i, f.status, ctx + ' › Filter steps'));
+  const fsStatuses = conn.filterSteps.map((f, i) => effFilter(conn, i));
+  const fsGroup    = renderGroup('Filter steps', fsLeaves, fsStatuses, conn.id + ':grp:fs');
 
+  // Selection algorithm
   const selChildren = [
-    renderLeaf('Input parameters',   ss.inputs      || 'todo'),
-    renderLeaf('Derived parameters', ss.derived     || 'todo'),
+    renderLeaf('Input parameters',   conn.id + ':inputs',      conn.sectionStatuses.inputs      || 'todo', ctx + ' › Selection algorithm'),
+    renderLeaf('Derived parameters', conn.id + ':derived',     conn.sectionStatuses.derived     || 'todo', ctx + ' › Selection algorithm'),
     fsGroup,
-    renderLeaf('Sorting steps',      ss.sorting     || 'todo'),
-    renderLeaf('Limitations',        ss.limitations || 'todo'),
+    renderLeaf('Sorting steps',      conn.id + ':sorting',     conn.sectionStatuses.sorting     || 'todo', ctx + ' › Selection algorithm'),
+    renderLeaf('Limitations',        conn.id + ':limitations', conn.sectionStatuses.limitations || 'todo', ctx + ' › Selection algorithm'),
   ];
   const selStatuses = [
-    ss.inputs      || 'todo',
-    ss.derived     || 'todo',
+    effSection(conn, 'inputs'),
+    effSection(conn, 'derived'),
     derivedStatus(fsStatuses),
-    ss.sorting     || 'todo',
-    ss.limitations || 'todo',
+    effSection(conn, 'sorting'),
+    effSection(conn, 'limitations'),
   ];
-  const selGroup = renderGroup('Selection algorithm', selChildren, selStatuses);
+  const selGroup = renderGroup('Selection algorithm', selChildren, selStatuses, conn.id + ':grp:sel');
 
+  // Top-level section leaves
   [
-    ['Resources',               ss.resources   || 'todo'],
-    ['Description',             ss.description || 'todo'],
-    ['Principles of operation', ss.principles  || 'todo'],
-    ['Resistance derivation',   ss.resistance  || 'todo'],
-  ].forEach(([lbl, st]) => subUl.appendChild(renderLeaf(lbl, st)));
+    ['Resources',               'resources'],
+    ['Description',             'description'],
+    ['Principles of operation', 'principles'],
+    ['Resistance derivation',   'resistance'],
+  ].forEach(([lbl, key]) =>
+    subUl.appendChild(renderLeaf(lbl, conn.id + ':' + key, conn.sectionStatuses[key] || 'todo', ctx)));
 
   subUl.appendChild(selGroup);
-  subUl.appendChild(renderLeaf('RFEM Modelling', ss.rfem || 'todo'));
+  subUl.appendChild(renderLeaf('RFEM Modelling', conn.id + ':rfem', conn.sectionStatuses.rfem || 'todo', ctx));
 
-  const allLeafStatuses = SECTION_KEYS.map(k => ss[k] || 'todo').concat(fs.map(f => f.status));
+  const allLeafStatuses = SECTION_KEYS.map(k => effSection(conn, k)).concat(fsStatuses);
   const done    = allLeafStatuses.filter(s => s === 'done').length;
   const total   = allLeafStatuses.length;
+  const started = allLeafStatuses.some(s => WIP_KEYS.includes(s));
   const miniPct = total ? Math.round(done / total * 100) : 0;
-  const stripeClass = done === total ? 's-done' : done > 0 ? 's-wip' : 's-todo';
+  const stripeClass = done === total ? 's-done' : started ? 's-wip' : 's-todo';
 
-  if (done === 0) {
-    subUl.innerHTML = '';
+  // "No methodology" banner — shown when nothing has been started yet,
+  // but the leaves below stay editable so anyone can start moving it forward.
+  if (!started) {
     const warn = document.createElement('li');
     warn.className = 'tnode';
     warn.innerHTML =
       '<div class="no-checks-wrap"><div class="no-checks-row">' +
       '<span class="no-checks-icon">⚠️</span>' +
-      '<span class="no-checks-text">No methodology provided yet</span>' +
+      '<span class="no-checks-text">No methodology provided yet — set a status below to start tracking.</span>' +
       '</div></div>';
-    subUl.appendChild(warn);
+    subUl.insertBefore(warn, subUl.firstChild);
   }
 
-  const toggle = makeToggle(subUl, false);
-  toggle.textContent = '+';
+  const toggle = makeToggle(subUl, false, conn.id, false);
 
   const topRow = document.createElement('div');
   topRow.className = 'row';
@@ -378,12 +586,12 @@ function renderConnector(conn) {
   const labelEl = document.createElement('span');
   labelEl.className = 'label group';
   labelEl.innerHTML = (conn.link
-    ? '<a href="' + conn.link + '" target="_blank">' + conn.type + '</a>'
+    ? '<a href="' + conn.link + '" target="_blank" rel="noopener">' + conn.type + '</a>'
     : conn.type
   ) + '<span class="mfr-plain">(' + conn.manufacturer + ')</span>';
   topRow.appendChild(labelEl);
 
-  if (done === 0) {
+  if (!started) {
     const badge = document.createElement('span');
     badge.className = 'badge b-todo';
     badge.innerHTML = 'To do <span style="opacity:.6;font-size:10px">[TECH]</span>';
@@ -406,8 +614,27 @@ function renderConnector(conn) {
 }
 
 const root = document.getElementById('root');
-connectors.forEach(conn => root.appendChild(renderConnector(conn)));
-computeStats();
+function renderAll() {
+  root.innerHTML = '';
+  connectors.forEach(conn => root.appendChild(renderConnector(conn)));
+  computeStats();
+}
+
+// First paint from seed (works even before Firestore responds).
+renderAll();
+
+// ─── LIVE SYNC ───────────────────────────────────────────────────────────────
+const banner = document.getElementById('conn-banner');
+onSnapshot(collection(db, COLLECTION), snap => {
+  banner.style.display = 'none';
+  overrides = {};
+  snap.forEach(d => { overrides[d.id] = d.data(); });
+  renderAll();
+}, err => {
+  console.error('Firestore error:', err);
+  banner.textContent = 'Live status sync is unavailable (' + (err.code || err.message) + '). Showing last loaded data; changes may not save.';
+  banner.style.display = 'block';
+});
 </script>
 </body>
 </html>
