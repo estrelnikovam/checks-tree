@@ -5,108 +5,171 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Connectors Checks Tree</title>
 <style>
+/* ─── Atlassian Design System tokens ─────────────────────────────────────── */
+:root {
+  --ds-text:         #172B4D;
+  --ds-text-subtle:  #44546F;
+  --ds-text-subtlest:#626F86;
+  --ds-link:         #0C66E4;
+  --ds-link-hover:   #0055CC;
+
+  --ds-surface:      #FFFFFF;
+  --ds-sunken:       #F7F8F9;
+  --ds-neutral:      #F1F2F4;
+  --ds-neutral-hover:#DCDFE4;
+  --ds-hover:        #091E420F;
+  --ds-border:       #DCDFE4;
+  --ds-border-bold:  #8590A2;
+
+  --ds-brand:        #0C66E4;
+  --ds-brand-hover:  #0055CC;
+
+  --ds-success-bg:   #DCFFF1;
+  --ds-success-tx:   #216E4E;
+  --ds-success-bold: #22A06B;
+  --ds-info-bg:      #E9F2FF;
+  --ds-info-tx:      #0055CC;
+  --ds-warn-bg:      #FFF7D6;
+  --ds-warn-tx:      #974F0C;
+  --ds-warn-bold:    #E2B203;
+  --ds-danger-bg:    #FFECEB;
+  --ds-danger-tx:    #C9372C;
+  --ds-danger-bold:  #E34935;
+  --ds-neutral-bg:   #DCDFE4;
+  --ds-neutral-tx:   #44546F;
+
+  --ds-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Droid Sans", "Helvetica Neue", sans-serif;
+  --ds-radius: 3px;
+  --ds-radius-lg: 8px;
+  --ds-shadow-card: 0 1px 1px rgba(9,30,66,.25), 0 0 1px rgba(9,30,66,.31);
+  --ds-shadow-overlay: 0 0 0 1px rgba(9,30,66,.08), 0 8px 16px -4px rgba(9,30,66,.25), 0 0 1px rgba(9,30,66,.31);
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fff; color: #1a1a1a; padding: 1.5rem; }
-.wrap { max-width: 920px; }
+body { font-family: var(--ds-font); background: var(--ds-sunken); color: var(--ds-text); padding: 32px 24px; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 940px; margin: 0 auto; background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-lg); box-shadow: var(--ds-shadow-card); padding: 28px 32px; }
 
-.topbar { display: flex; gap: 12px; margin-bottom: 1rem; flex-wrap: wrap; }
-.vblock { background: #f5f5f3; border-radius: 8px; padding: 10px 16px; font-size: 13px; flex: 1; min-width: 200px; }
-.vblock-title { font-weight: 500; font-size: 12px; color: #888; margin-bottom: 6px; }
+.page-head { margin-bottom: 20px; }
+.ph-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--ds-text-subtlest); margin-bottom: 4px; }
+.ph-title { font-size: 24px; font-weight: 600; letter-spacing: -.01em; color: var(--ds-text); }
+
+.topbar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.vblock { background: var(--ds-sunken); border: 1px solid var(--ds-border); border-radius: var(--ds-radius); padding: 12px 16px; font-size: 13px; flex: 1; min-width: 220px; }
+.vblock-title { font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; color: var(--ds-text-subtlest); margin-bottom: 8px; }
 .vblock-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-.vblock-bar { flex: 1; height: 6px; border-radius: 3px; background: #e0e0da; overflow: hidden; }
-.vblock-fill-green { height: 100%; border-radius: 3px; background: #1D9E75; transition: width .4s; display: inline-block; float: left; }
-.vblock-fill-red   { height: 100%; border-radius: 3px; background: #E24B4A; transition: width .4s; display: inline-block; float: left; }
-.vblock-num { font-size: 12px; color: #888; white-space: nowrap; }
-.vblock-num b { color: #1a1a1a; font-weight: 500; }
-.vblock-sub { font-size: 11px; color: #aaa; margin-top: 2px; }
+.vblock-bar { flex: 1; height: 8px; border-radius: 100px; background: var(--ds-neutral-hover); overflow: hidden; }
+.vblock-fill-green { height: 100%; border-radius: 100px; background: var(--ds-success-bold); transition: width .4s; display: inline-block; float: left; }
+.vblock-fill-red   { height: 100%; border-radius: 100px; background: var(--ds-danger-bold); transition: width .4s; display: inline-block; float: left; }
+.vblock-num { font-size: 12px; color: var(--ds-text-subtlest); white-space: nowrap; }
+.vblock-num b { color: var(--ds-text); font-weight: 600; }
+.vblock-sub { font-size: 11px; color: var(--ds-text-subtlest); margin-top: 4px; }
 
-.legend { display: flex; gap: 8px; font-size: 12px; color: #888; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; }
-.badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; white-space: nowrap; flex-shrink: 0; }
-.b-done     { background: #EAF3DE; color: #3B6D11; }
-.b-todo     { background: #FCEBEB; color: #A32D2D; }
-.b-onhold   { background: #f0f0ec; color: #888; }
-.b-wip      { background: #FFF3DC; color: #8a5c00; }
+.legend { display: flex; gap: 6px; font-size: 12px; color: var(--ds-text-subtlest); margin-bottom: 18px; flex-wrap: wrap; align-items: center; padding: 12px 16px; background: var(--ds-sunken); border: 1px solid var(--ds-border); border-radius: var(--ds-radius); }
+.badge {
+  display: inline-flex; align-items: center;
+  font-size: 11px; font-weight: 700; line-height: 16px; letter-spacing: .3px;
+  text-transform: uppercase; padding: 0 6px; border-radius: var(--ds-radius);
+  white-space: nowrap; flex-shrink: 0;
+}
+.b-done     { background: var(--ds-success-bg); color: var(--ds-success-tx); }
+.b-todo     { background: var(--ds-neutral-bg);  color: var(--ds-neutral-tx); }
+.b-onhold   { background: var(--ds-warn-bg);     color: var(--ds-warn-tx); }
+.b-wip      { background: var(--ds-info-bg);     color: var(--ds-info-tx); }
 
-.mfr-plain { font-size: 13px; color: #888; font-weight: 400; margin-left: 3px; }
+.mfr-plain { font-size: 14px; color: var(--ds-text-subtlest); font-weight: 400; margin-left: 5px; }
 
 ul.tree { list-style: none; padding: 0; }
-ul.tree ul { list-style: none; padding: 0; margin-left: 20px; border-left: 1.5px solid #e0e0da; }
+ul.tree ul { list-style: none; padding: 0; margin-left: 22px; border-left: 1px solid var(--ds-border); }
 li.tnode { padding: 0; }
-.row { display: flex; align-items: center; gap: 7px; padding: 4px 6px; border-radius: 6px; cursor: default; user-select: none; }
-.row:hover { background: #f5f5f3; }
-.toggle { width: 16px; height: 16px; border-radius: 4px; border: 0.5px solid #ccc; background: #fff; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; color: #888; }
-.spacer { width: 16px; flex-shrink: 0; }
-.label { font-size: 13px; flex: 1; min-width: 0; }
+.row { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: var(--ds-radius); cursor: default; user-select: none; }
+.row:hover { background: var(--ds-hover); }
+.row.leaf { cursor: pointer; }
+.toggle { width: 20px; height: 20px; border-radius: var(--ds-radius); border: none; background: transparent; color: var(--ds-text-subtlest); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; padding: 0; }
+.toggle:hover { background: var(--ds-hover); color: var(--ds-text-subtle); }
+.toggle svg { width: 12px; height: 12px; transition: transform .15s ease; }
+.toggle.open svg { transform: rotate(90deg); }
+.spacer { width: 20px; flex-shrink: 0; }
+.label { font-size: 14px; flex: 1; min-width: 0; color: var(--ds-text); }
 .label.group { font-weight: 500; }
-.label a { color: #1a1a1a; text-decoration: none; border-bottom: 1px dashed #bbb; }
-.label a:hover { color: #185FA5; border-bottom-color: #185FA5; }
-.count { font-size: 12px; color: #888; white-space: nowrap; flex-shrink: 0; }
-.count b { color: #1a1a1a; font-weight: 500; }
-.mini { width: 36px; height: 5px; border-radius: 3px; background: #e8e8e4; overflow: hidden; flex-shrink: 0; }
-.mini-f { height: 100%; border-radius: 3px; background: #1D9E75; }
-.stripe { width: 8px; flex-shrink: 0; border-radius: 2px; align-self: stretch; min-height: 22px; }
-.s-done     { background: #1D9E75; }
-.s-wip      { background: #EF9F27; }
-.s-todo     { background: #E24B4A; }
-.s-onhold   { background: #ccc; }
+.label a { color: var(--ds-text); text-decoration: none; border-bottom: 1px dashed var(--ds-border-bold); }
+.label a:hover { color: var(--ds-link); border-bottom-color: var(--ds-link); }
+.add-sub { width: 20px; height: 20px; border-radius: var(--ds-radius); border: none; background: transparent; color: var(--ds-text-subtlest); font-size: 16px; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.add-sub:hover { background: var(--ds-hover); color: var(--ds-brand); }
+.count { font-size: 12px; color: var(--ds-text-subtlest); white-space: nowrap; flex-shrink: 0; }
+.count b { color: var(--ds-text); font-weight: 600; }
+.mini { width: 40px; height: 6px; border-radius: 100px; background: var(--ds-neutral-hover); overflow: hidden; flex-shrink: 0; }
+.mini-f { height: 100%; border-radius: 100px; background: var(--ds-success-bold); }
+.stripe { width: 3px; flex-shrink: 0; border-radius: 100px; align-self: stretch; min-height: 20px; }
+.s-done     { background: var(--ds-success-bold); }
+.s-wip      { background: var(--ds-brand); }
+.s-todo     { background: var(--ds-border-bold); }
+.s-onhold   { background: var(--ds-warn-bold); }
 
-.no-checks-wrap { margin: 3px 0 3px 23px; }
+.no-checks-wrap { margin: 4px 0 4px 28px; }
 .no-checks-row {
   display: flex; align-items: center; gap: 8px;
-  padding: 6px 10px; border-radius: 6px;
-  background: #fff6f6; border: 1px dashed #f0a0a0;
+  padding: 8px 12px; border-radius: var(--ds-radius);
+  background: var(--ds-danger-bg); border: 1px solid #FFD5D2;
 }
 .no-checks-icon { font-size: 14px; flex-shrink: 0; }
-.no-checks-text { font-size: 12px; color: #b02020; flex: 1; line-height: 1.4; }
-.no-checks-tag  { font-size: 10px; background: #FCEBEB; color: #A32D2D; border-radius: 8px; padding: 1px 7px; white-space: nowrap; font-weight: 600; }
+.no-checks-text { font-size: 12px; color: var(--ds-danger-tx); flex: 1; line-height: 1.4; }
+.no-checks-tag  { font-size: 10px; font-weight: 700; letter-spacing: .3px; text-transform: uppercase; background: #fff; color: var(--ds-danger-tx); border-radius: var(--ds-radius); padding: 1px 6px; white-space: nowrap; }
 
 /* ─── editing / comments ─────────────────────────────────────────────────── */
-.badge.editable { cursor: pointer; }
-.badge.editable:hover { outline: 1.5px solid rgba(0,0,0,.18); }
-.cmt-icon { display: inline-flex; align-items: center; margin-left: 4px; color: #9a9a9a; cursor: default; flex-shrink: 0; }
-.cmt-icon:hover { color: #555; }
+.cmt-icon { display: inline-flex; align-items: center; margin-left: 2px; color: var(--ds-text-subtlest); cursor: default; flex-shrink: 0; }
+.cmt-icon:hover { color: var(--ds-text-subtle); }
 .cmt-icon svg { display: block; }
 
 #tip {
   position: fixed; z-index: 3000; max-width: 280px; display: none;
-  background: #fff; color: #333; font-size: 12px; line-height: 1.5;
-  padding: 9px 11px; border: 1px solid #e2e2dc; border-radius: 6px; pointer-events: none;
-  box-shadow: 0 6px 20px rgba(0,0,0,.12); white-space: pre-wrap;
+  background: var(--ds-text); color: #fff; font-size: 12px; line-height: 1.45;
+  padding: 6px 10px; border-radius: var(--ds-radius); pointer-events: none;
+  box-shadow: var(--ds-shadow-overlay); white-space: pre-wrap;
 }
-#tip .tip-meta { color: #999; font-size: 11px; margin-top: 6px; padding-top: 6px; border-top: 1px solid #efefe9; }
+#tip .tip-meta { color: #B3BAC5; font-size: 11px; margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,.16); }
 
 #conn-banner {
-  display: none; background: #fff6f6; border: 1px dashed #f0a0a0; color: #b02020;
-  font-size: 12px; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px;
+  display: none; background: var(--ds-danger-bg); border: 1px solid #FFD5D2; color: var(--ds-danger-tx);
+  font-size: 12px; padding: 8px 12px; border-radius: var(--ds-radius); margin-bottom: 12px;
 }
 
 .modal-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 4000;
+  position: fixed; inset: 0; background: rgba(9,30,66,.54); z-index: 4000;
   display: none; align-items: center; justify-content: center;
 }
 .modal {
-  background: #fff; border-radius: 10px; padding: 18px 20px; width: 360px; max-width: 92vw;
-  box-shadow: 0 12px 44px rgba(0,0,0,.28);
+  background: #fff; border-radius: var(--ds-radius-lg); padding: 24px 28px; width: 420px; max-width: 92vw;
+  box-shadow: var(--ds-shadow-overlay);
 }
-.modal-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-.modal-sub { font-size: 11px; color: #999; margin-bottom: 10px; }
-.modal-lbl { display: block; font-size: 11px; color: #888; margin: 12px 0 4px; }
+.modal-title { font-size: 16px; font-weight: 600; color: var(--ds-text); margin-bottom: 2px; }
+.modal-sub { font-size: 12px; color: var(--ds-text-subtlest); margin-bottom: 6px; }
+.modal-lbl { display: block; font-size: 12px; font-weight: 600; color: var(--ds-text-subtle); margin: 14px 0 4px; }
 .modal select, .modal textarea, .modal input {
-  width: 100%; font-size: 13px; padding: 7px 9px; border: 1px solid #ddd;
-  border-radius: 6px; font-family: inherit; color: #1a1a1a; background: #fff;
+  width: 100%; font-size: 14px; padding: 6px 8px; border: 2px solid var(--ds-border);
+  border-radius: var(--ds-radius); font-family: inherit; color: var(--ds-text); background: var(--ds-sunken);
+  transition: background .1s, border-color .1s;
 }
+.modal select:hover, .modal textarea:hover, .modal input:hover { background: var(--ds-neutral); }
+.modal select:focus, .modal textarea:focus, .modal input:focus { outline: none; background: #fff; border-color: var(--ds-brand); }
 .modal textarea { resize: vertical; }
-.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
-.btn { font-size: 13px; padding: 7px 16px; border-radius: 6px; border: 1px solid transparent; cursor: pointer; font-family: inherit; }
-.btn-ghost { background: #f0f0ec; color: #444; }
-.btn-ghost:hover { background: #e6e6e0; }
-.btn-primary { background: #185FA5; color: #fff; }
-.btn-primary:hover { background: #134d85; }
-.modal-err { color: #b02020; font-size: 12px; margin-top: 10px; min-height: 14px; }
+.modal-actions { display: flex; align-items: center; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+.btn { font-size: 14px; font-weight: 500; padding: 6px 12px; border-radius: var(--ds-radius); border: none; cursor: pointer; font-family: inherit; transition: background .1s; }
+.btn-ghost { background: var(--ds-neutral); color: var(--ds-text-subtle); }
+.btn-ghost:hover { background: var(--ds-neutral-hover); }
+.btn-primary { background: var(--ds-brand); color: #fff; }
+.btn-primary:hover { background: var(--ds-brand-hover); }
+.btn-danger { background: transparent; color: var(--ds-danger-tx); }
+.btn-danger:hover { background: var(--ds-danger-bg); }
+.modal-err { color: var(--ds-danger-tx); font-size: 12px; margin-top: 10px; min-height: 14px; }
 </style>
 </head>
 <body>
 <div class="wrap">
+
+  <div class="page-head">
+    <div class="ph-eyebrow">RTA · Structural connectors</div>
+    <h1 class="ph-title">Connectors checks tree</h1>
+  </div>
 
   <div id="conn-banner"></div>
 
@@ -156,13 +219,23 @@ li.tnode { padding: 0; }
     <div class="modal-title" id="modal-node-label"></div>
     <div class="modal-sub" id="modal-node-path"></div>
 
+    <div id="modal-label-wrap" style="display:none">
+      <label class="modal-lbl" for="modal-label-input">Name</label>
+      <input id="modal-label-input" type="text" placeholder="Filter step name" />
+    </div>
+
     <label class="modal-lbl" for="modal-status">Status</label>
     <select id="modal-status"></select>
 
     <label class="modal-lbl" for="modal-comment">Comment (shown on hover)</label>
     <textarea id="modal-comment" rows="3" placeholder="What changed / why — optional"></textarea>
 
+    <label class="modal-lbl" for="modal-link">Link (URL)</label>
+    <input id="modal-link" type="url" placeholder="https://… — optional" />
+
     <div class="modal-actions">
+      <button class="btn btn-danger" id="modal-delete" style="display:none">Delete</button>
+      <span style="flex:1"></span>
       <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
       <button class="btn btn-primary" id="modal-save">Save</button>
     </div>
@@ -299,7 +372,8 @@ function computeStats() {
   let leafDone = 0, leafTotal = 0;
   connectors.forEach(c => {
     const statuses = SECTION_KEYS.map(k => effSection(c, k))
-                                 .concat(c.filterSteps.map((f, i) => effFilter(c, i)));
+                                 .concat(c.filterSteps.map((f, i) => effFilter(c, i)))
+                                 .concat(fsAddedStatuses(c));
     leafTotal += statuses.length;
     leafDone  += statuses.filter(s => s === 'done').length;
   });
@@ -353,11 +427,26 @@ function esc(s) {
 }
 
 // ─── EDITOR MODAL ────────────────────────────────────────────────────────────
-const backdrop  = document.getElementById('modal-backdrop');
-const selEl     = document.getElementById('modal-status');
-const commentEl = document.getElementById('modal-comment');
-const errEl     = document.getElementById('modal-err');
-let editing = null; // { key, seed, label, path }
+const backdrop   = document.getElementById('modal-backdrop');
+const selEl      = document.getElementById('modal-status');
+const commentEl  = document.getElementById('modal-comment');
+const linkEl     = document.getElementById('modal-link');
+const labelWrap  = document.getElementById('modal-label-wrap');
+const labelInput = document.getElementById('modal-label-input');
+const deleteBtn  = document.getElementById('modal-delete');
+const errEl      = document.getElementById('modal-err');
+let editing = null; // { key, seed, label, path, isSub, parentKey, isNew }
+
+const MAX_FILTER_STEPS = 20;
+
+// Added items live in Firestore as docs keyed `<parentKey>:sub:<id>` with isSub:true.
+// Derived from the already-loaded `overrides`; soft-deleted ones are skipped.
+function subKeysOf(parentKey) {
+  const prefix = parentKey + ':sub:';
+  return Object.keys(overrides)
+    .filter(k => k.startsWith(prefix) && overrides[k] && overrides[k].isSub && !overrides[k].deleted)
+    .sort((a, b) => (overrides[a].order || 0) - (overrides[b].order || 0));
+}
 
 STATUSES.forEach(s => {
   const opt = document.createElement('option');
@@ -365,87 +454,165 @@ STATUSES.forEach(s => {
   selEl.appendChild(opt);
 });
 
-function openEditor(key, seed, label, path) {
-  editing = { key, seed, label, path };
+function openEditor(key, seed, label, path, seedLink) {
+  editing = { key, seed, label, path, isSub: false };
   const meta = overrides[key] || {};
   document.getElementById('modal-node-label').textContent = label;
   document.getElementById('modal-node-path').textContent  = path || '';
+  labelWrap.style.display = 'none';
+  deleteBtn.style.display = 'none';
   selEl.value     = meta.status || seed || 'todo';
   commentEl.value = meta.comment || '';
+  linkEl.value    = meta.link || seedLink || '';
   errEl.textContent = '';
   backdrop.style.display = 'flex';
   selEl.focus();
 }
+
+function openSubEditor(parentKey, childKey, isNew, path) {
+  const key  = isNew ? parentKey + ':sub:' + Date.now() : childKey;
+  const meta = (!isNew && overrides[childKey]) ? overrides[childKey] : {};
+  editing = { key, seed: 'todo', label: meta.label || '', path: path || '', isSub: true, parentKey, isNew };
+  document.getElementById('modal-node-label').textContent = isNew ? 'New filter step' : (meta.label || 'Filter step');
+  document.getElementById('modal-node-path').textContent  = path || '';
+  labelWrap.style.display = '';
+  labelInput.value = meta.label || '';
+  selEl.value      = meta.status  || 'todo';
+  commentEl.value  = meta.comment || '';
+  linkEl.value     = meta.link    || '';
+  deleteBtn.style.display = isNew ? 'none' : '';
+  errEl.textContent = '';
+  backdrop.style.display = 'flex';
+  labelInput.focus();
+}
+
 function closeEditor() { backdrop.style.display = 'none'; editing = null; }
 
 async function saveEditor() {
   if (!editing) return;
   const comment = commentEl.value.trim();
   const status  = selEl.value;
+  let link = linkEl.value.trim();
+  if (link && !/^https?:\/\//i.test(link)) link = 'https://' + link;
+
+  const data = {
+    status, comment, link,
+    label: editing.label,
+    path:  editing.path || '',
+    updatedAt: serverTimestamp(),
+  };
+
+  if (editing.isSub) {
+    const name = labelInput.value.trim();
+    if (!name) { errEl.textContent = 'Enter a name'; labelInput.focus(); return; }
+    if (editing.isNew && subKeysOf(editing.parentKey).length >= MAX_FILTER_STEPS) {
+      errEl.textContent = 'Limit of ' + MAX_FILTER_STEPS + ' filter steps reached'; return;
+    }
+    data.label     = name;
+    data.isSub     = true;
+    data.parentKey = editing.parentKey;
+    data.deleted   = false;
+    data.order     = editing.isNew ? Date.now()
+                                   : ((overrides[editing.key] && overrides[editing.key].order) || Date.now());
+  }
+
   errEl.textContent = 'Saving…';
   try {
-    await setDoc(doc(db, COLLECTION, editing.key), {
-      status, comment,
-      label: editing.label,
-      path:  editing.path || '',
-      updatedAt: serverTimestamp(),
-    });
+    await setDoc(doc(db, COLLECTION, editing.key), data);
     closeEditor(); // re-render happens via onSnapshot
   } catch (e) {
     errEl.textContent = 'Could not save: ' + (e && e.message ? e.message : e);
   }
 }
 
+async function deleteSub() {
+  if (!editing || !editing.isSub || editing.isNew) return;
+  errEl.textContent = 'Deleting…';
+  try {
+    // Soft delete (stays within existing Firestore write rules — comment is a string).
+    await setDoc(doc(db, COLLECTION, editing.key), {
+      deleted: true, isSub: true, parentKey: editing.parentKey,
+      status: 'todo', comment: '', link: '',
+      label: editing.label || '', path: editing.path || '',
+      order: (overrides[editing.key] && overrides[editing.key].order) || Date.now(),
+      updatedAt: serverTimestamp(),
+    });
+    closeEditor();
+  } catch (e) {
+    errEl.textContent = 'Could not delete: ' + (e && e.message ? e.message : e);
+  }
+}
+
 document.getElementById('modal-save').onclick   = saveEditor;
+document.getElementById('modal-delete').onclick = deleteSub;
 document.getElementById('modal-cancel').onclick = closeEditor;
 backdrop.addEventListener('click', e => { if (e.target === backdrop) closeEditor(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && editing) closeEditor(); });
 
 // ─── RENDER ──────────────────────────────────────────────────────────────────
+const CHEVRON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+const COMMENT_SVG =
+  '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">' +
+  '<path d="M3 2.5h10a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 13 11.5H7l-3.5 2.8V11.5H3A1.5 1.5 0 0 1 1.5 10V4A1.5 1.5 0 0 1 3 2.5z"/>' +
+  '<path d="M4.5 6h7M4.5 8.3h4.5"/></svg>';
+
 function makeToggle(subUl, expandAll, stateKey, defaultOpen) {
   const toggle = document.createElement('div');
   toggle.className = 'toggle';
+  toggle.innerHTML = CHEVRON;
   const open = (stateKey in openState) ? openState[stateKey] : defaultOpen;
   subUl.style.display = open ? '' : 'none';
-  toggle.textContent  = open ? '−' : '+';
+  toggle.classList.toggle('open', open);
   toggle.onclick = function () {
     const collapsed = subUl.style.display === 'none';
     if (collapsed) {
       subUl.style.display = '';
       if (expandAll) {
         subUl.querySelectorAll('ul').forEach(ul => ul.style.display = '');
-        subUl.querySelectorAll('.toggle').forEach(t => t.textContent = '−');
+        subUl.querySelectorAll('.toggle').forEach(t => t.classList.add('open'));
       }
-      toggle.textContent = '−';
+      toggle.classList.add('open');
       openState[stateKey] = true;
     } else {
       subUl.style.display = 'none';
-      toggle.textContent = '+';
+      toggle.classList.remove('open');
       openState[stateKey] = false;
     }
   };
   return toggle;
 }
 
-function renderLeaf(label, nodeKey, seedStatus, path) {
+function renderLeaf(label, nodeKey, seedStatus, path, onEdit) {
   const status = leafStatus(nodeKey, seedStatus);
   const meta   = overrides[nodeKey];
   const cls = sCls(status), lbl = sLabel(status);
+  const link = meta && meta.link;
 
   const li = document.createElement('li');
   li.className = 'tnode';
 
   const row = document.createElement('div');
-  row.className = 'row';
+  row.className = 'row leaf';
+  row.title = 'Click to set status or link';
+  row.onclick = onEdit || (() => openEditor(nodeKey, seedStatus, label, path));
 
   const spacer = document.createElement('div'); spacer.className = 'spacer'; row.appendChild(spacer);
   const stripe = document.createElement('div'); stripe.className = 'stripe s-' + cls; row.appendChild(stripe);
-  const labelEl = document.createElement('span'); labelEl.className = 'label'; labelEl.textContent = label; row.appendChild(labelEl);
+
+  const labelEl = document.createElement('span'); labelEl.className = 'label';
+  if (link) {
+    const a = document.createElement('a');
+    a.href = link; a.target = '_blank'; a.rel = 'noopener'; a.textContent = label;
+    a.onclick = e => e.stopPropagation();   // follow the link; don't open the editor
+    labelEl.appendChild(a);
+  } else {
+    labelEl.textContent = label;
+  }
+  row.appendChild(labelEl);
 
   const badge = document.createElement('span');
-  badge.className = 'badge editable b-' + cls;
+  badge.className = 'badge b-' + cls;
   badge.textContent = lbl;
-  badge.onclick = () => openEditor(nodeKey, seedStatus, label, path);
   row.appendChild(badge);
 
   if (meta) {
@@ -465,7 +632,13 @@ function renderLeaf(label, nodeKey, seedStatus, path) {
   return li;
 }
 
-function renderGroup(label, childrenEl, statuses, stateKey) {
+// Users can add extra filter steps into a connector's "Filter steps" group.
+// They are stored in Firestore like sub-steps, keyed `<grpKey>:sub:<id>`.
+function fsGroupKey(conn)      { return conn.id + ':fsgrp'; }
+function fsAddedKeys(conn)     { return subKeysOf(fsGroupKey(conn)); }
+function fsAddedStatuses(conn) { return fsAddedKeys(conn).map(k => (overrides[k] && overrides[k].status) || 'todo'); }
+
+function renderGroup(label, childrenEl, statuses, stateKey, onAdd) {
   const status  = derivedStatus(statuses);
   const cls     = sCls(status);
   const done    = statuses.filter(s => s === 'done').length;
@@ -504,6 +677,15 @@ function renderGroup(label, childrenEl, statuses, stateKey) {
   miniEl.innerHTML = '<div class="mini-f" style="width:' + miniPct + '%"></div>';
   row.appendChild(miniEl);
 
+  if (onAdd) {
+    const add = document.createElement('span');
+    add.className = 'add-sub';
+    add.textContent = '+';
+    add.title = 'Add a filter step';
+    add.onclick = e => { e.stopPropagation(); onAdd(); };
+    row.appendChild(add);
+  }
+
   li.appendChild(row);
   li.appendChild(subUl);
   return li;
@@ -518,11 +700,20 @@ function renderConnector(conn) {
 
   const ctx = conn.type + ' (' + conn.manufacturer + ')';
 
-  // Filter steps
-  const fsLeaves   = conn.filterSteps.map((f, i) =>
-    renderLeaf(f.label, conn.id + ':fs:' + i, f.status, ctx + ' › Filter steps'));
-  const fsStatuses = conn.filterSteps.map((f, i) => effFilter(conn, i));
-  const fsGroup    = renderGroup('Filter steps', fsLeaves, fsStatuses, conn.id + ':grp:fs');
+  // Filter steps — seed steps plus any user-added ones (one level, capped).
+  const fsCtx     = ctx + ' › Filter steps';
+  const fsGrpKey  = fsGroupKey(conn);
+  const fsAdded   = fsAddedKeys(conn);
+  const fsLeaves  = conn.filterSteps.map((f, i) =>
+                      renderLeaf(f.label, conn.id + ':fs:' + i, f.status, fsCtx))
+                    .concat(fsAdded.map(ck =>
+                      renderLeaf((overrides[ck] && overrides[ck].label) || '(unnamed)', ck, 'todo', fsCtx,
+                        () => openSubEditor(fsGrpKey, ck, false, fsCtx))));
+  const fsStatuses = conn.filterSteps.map((f, i) => effFilter(conn, i)).concat(fsAddedStatuses(conn));
+  const fsOnAdd    = fsAdded.length < MAX_FILTER_STEPS
+                       ? () => openSubEditor(fsGrpKey, null, true, fsCtx)
+                       : null;
+  const fsGroup    = renderGroup('Filter steps', fsLeaves, fsStatuses, conn.id + ':grp:fs', fsOnAdd);
 
   // Selection algorithm
   const selChildren = [
@@ -558,11 +749,21 @@ function renderConnector(conn) {
   const total   = allLeafStatuses.length;
   const started = allLeafStatuses.some(s => WIP_KEYS.includes(s));
   const miniPct = total ? Math.round(done / total * 100) : 0;
-  const stripeClass = done === total ? 's-done' : started ? 's-wip' : 's-todo';
 
-  // "No methodology" banner — shown when nothing has been started yet,
-  // but the leaves below stay editable so anyone can start moving it forward.
-  if (!started) {
+  // The connector node is itself editable: a status + link can be set on it
+  // (stored in Firestore under the bare connector id). A manual status wins;
+  // otherwise the lozenge is derived from its leaves.
+  const ovr        = overrides[conn.id] || {};
+  const derivedKey = (total && done === total) ? 'done' : started ? 'methodology' : 'todo';
+  let effCls, effLabel;
+  if (ovr.status)                   { effCls = sCls(ovr.status); effLabel = sLabel(ovr.status); }
+  else if (total && done === total) { effCls = 'done'; effLabel = 'Done'; }
+  else if (started)                 { effCls = 'wip';  effLabel = 'In Progress'; }
+  else                              { effCls = 'todo'; effLabel = 'To Do'; }
+  const effLink = ovr.link || conn.link || '';
+
+  // "No methodology" banner — only while nothing is started and no status is set.
+  if (!started && !ovr.status) {
     const warn = document.createElement('li');
     warn.className = 'tnode';
     warn.innerHTML =
@@ -574,29 +775,43 @@ function renderConnector(conn) {
   }
 
   const toggle = makeToggle(subUl, false, conn.id, false);
+  toggle.addEventListener('click', e => e.stopPropagation());
 
   const topRow = document.createElement('div');
-  topRow.className = 'row';
+  topRow.className = 'row leaf';
+  topRow.title = 'Click to set status or link';
+  topRow.onclick = () => openEditor(conn.id, derivedKey, conn.type, 'Connector · ' + conn.manufacturer, effLink);
   topRow.appendChild(toggle);
 
   const stripe = document.createElement('div');
-  stripe.className = 'stripe ' + stripeClass;
+  stripe.className = 'stripe s-' + effCls;
   topRow.appendChild(stripe);
 
   const labelEl = document.createElement('span');
   labelEl.className = 'label group';
-  labelEl.innerHTML = (conn.link
-    ? '<a href="' + conn.link + '" target="_blank" rel="noopener">' + conn.type + '</a>'
-    : conn.type
-  ) + '<span class="mfr-plain">(' + conn.manufacturer + ')</span>';
+  labelEl.innerHTML = (effLink
+    ? '<a href="' + esc(effLink) + '" target="_blank" rel="noopener">' + esc(conn.type) + '</a>'
+    : esc(conn.type)
+  ) + '<span class="mfr-plain">(' + esc(conn.manufacturer) + ')</span>';
+  const a = labelEl.querySelector('a');
+  if (a) a.onclick = e => e.stopPropagation();
   topRow.appendChild(labelEl);
 
-  if (!started) {
-    const badge = document.createElement('span');
-    badge.className = 'badge b-todo';
-    badge.innerHTML = 'To do <span style="opacity:.6;font-size:10px">[TECH]</span>';
-    topRow.appendChild(badge);
-  } else {
+  const badge = document.createElement('span');
+  badge.className = 'badge b-' + effCls;
+  badge.textContent = effLabel;
+  topRow.appendChild(badge);
+
+  if (ovr.comment) {
+    attachTip(badge, ovr);
+    const ic = document.createElement('span');
+    ic.className = 'cmt-icon';
+    ic.innerHTML = COMMENT_SVG;
+    attachTip(ic, ovr);
+    topRow.appendChild(ic);
+  }
+
+  if (started) {
     const countEl = document.createElement('span');
     countEl.className = 'count';
     countEl.innerHTML = '<b>' + done + '</b>/' + total;
