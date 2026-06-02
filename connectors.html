@@ -69,7 +69,7 @@ body { font-family: var(--ds-font); background: transparent; color: var(--ds-tex
 }
 .b-done     { background: var(--ds-success-bg); color: var(--ds-success-tx); }
 .b-todo     { background: var(--ds-danger-bg);   color: var(--ds-danger-tx); }
-.b-onhold   { background: var(--ds-warn-bg);     color: var(--ds-warn-tx); }
+.b-onhold   { background: var(--ds-neutral-bg);  color: var(--ds-neutral-tx); }
 .b-wip      { background: var(--ds-info-bg);     color: var(--ds-info-tx); }
 
 .mfr-plain { font-size: 14px; color: var(--ds-text-subtlest); font-weight: 400; margin-left: 5px; }
@@ -99,7 +99,7 @@ li.tnode { padding: 0; }
 .s-done     { background: var(--ds-success-bold); }
 .s-wip      { background: var(--ds-brand); }
 .s-todo     { background: var(--ds-danger-bold); }
-.s-onhold   { background: var(--ds-warn-bold); }
+.s-onhold   { background: var(--ds-border-bold); }
 
 .no-checks-wrap { margin: 4px 0 4px 28px; }
 .no-checks-row {
@@ -178,21 +178,21 @@ li.tnode { padding: 0; }
   </div>
 
   <div class="legend">
-    <span class="badge b-todo">To do <span style="opacity:.6;font-size:10px">[TECH]</span></span>
+    <span class="badge b-todo">To do</span>
     <span style="color:#ccc;font-size:11px">→</span>
-    <span class="badge b-wip">Methodology <span style="opacity:.6;font-size:10px">[TECH]</span></span>
+    <span class="badge b-wip">Methodology</span>
     <span style="color:#ccc;font-size:11px">→</span>
-    <span class="badge b-wip">Dev <span style="opacity:.6;font-size:10px">[RTA]</span></span>
+    <span class="badge b-wip">Dev</span>
     <span style="color:#ccc;font-size:11px">→</span>
-    <span class="badge b-wip">QA <span style="opacity:.6;font-size:10px">[TECH]</span></span>
+    <span class="badge b-wip">QA</span>
     <span style="color:#ccc;font-size:11px">→</span>
-    <span class="badge b-wip">Export to report <span style="opacity:.6;font-size:10px">[RTA]</span></span>
+    <span class="badge b-wip">Export to report</span>
     <span style="color:#ccc;font-size:11px">→</span>
-    <span class="badge b-wip">Review <span style="opacity:.6;font-size:10px">[TECH]</span></span>
+    <span class="badge b-wip">Review</span>
     <span style="color:#ccc;font-size:11px">→</span>
-    <span class="badge b-wip">Export to RFEM <span style="opacity:.6;font-size:10px">[RTA]</span></span>
+    <span class="badge b-wip">Export to RFEM</span>
     <span style="color:#ccc;font-size:11px">→</span>
-    <span class="badge b-wip">Export to Procurement <span style="opacity:.6;font-size:10px">[RTA]</span></span>
+    <span class="badge b-wip">Export to Procurement</span>
     <span style="color:#ccc;font-size:11px">→</span>
     <span class="badge b-done">Done</span>
     <span class="badge b-onhold" style="margin-left:8px">On Hold</span>
